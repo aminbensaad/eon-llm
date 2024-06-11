@@ -1,0 +1,25 @@
+dev-v2.0.json on "nvidia/Llama3-ChatQA-1.5-8B" (no fine-tuning)
+{
+  "exact": 14.722479575507453,
+  "f1": 26.611465808476588,
+  "total": 11873,
+  "HasAns_exact": 28.18825910931174,
+  "HasAns_f1": 52.000326171397184,
+  "HasAns_total": 5928,
+  "NoAns_exact": 1.295206055508831,
+  "NoAns_f1": 1.295206055508831,
+  "NoAns_total": 5945
+}
+
+dev-v2.0.json dev-evaluate-v2.0-in1 (provided benchmark)
+{
+  "exact": 64.81091552261434,
+  "f1": 67.60971132981268,
+  "total": 11873,
+  "HasAns_exact": 59.159919028340084,
+  "HasAns_f1": 64.76553687902599,
+  "HasAns_total": 5928,
+  "NoAns_exact": 70.4457527333894,
+  "NoAns_f1": 70.4457527333894,
+  "NoAns_total": 5945
+}
