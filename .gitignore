@@ -35,7 +35,7 @@ build/
 
 # Personal and trash directories
 personal/
-trash 🗑️/
+trash/
 
 # Miscellaneous
 .DS_Store
