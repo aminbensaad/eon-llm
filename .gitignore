@@ -1,2 +1,83 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# VSCode
+.vscode/
+
+# Conda
+.conda/
+
+# Environment variables
 .env
-personal
+
+# Slurm batch scripts
+*.slurm
+
+# Personal and trash directories
+personal/
+trash/
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Compiled object files
+*.o
+*.so
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# Pylint
+.pylint.d/
+
+# Temporary files and directories
+*.temp
+*.tmp
+*.swp
+*.swo
+~*
+
+# OS-specific files
+Desktop.ini
