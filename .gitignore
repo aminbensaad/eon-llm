@@ -23,6 +23,7 @@ build/
 
 # VSCode
 .vscode/
+*code-workspace
 
 # Conda
 .conda/
