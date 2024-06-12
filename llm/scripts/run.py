@@ -21,7 +21,7 @@ metrics_dir = os.path.join(base, "metrics")
 eval_script = os.path.join(metrics_dir, "evaluate-v2.0.py")
 bleu_script = os.path.join(metrics_dir, "bleu.py")
 rouge_script = os.path.join(metrics_dir, "rouge.py")
-
+bertscore_script = os.path.join(metrics_dir, "BERT-score.py")
 
 # Define models to run
 model_scripts = {
@@ -62,7 +62,7 @@ germanquad_data_path = os.path.join(data_dir, "GermanQuAD/GermanQuAD_test.json")
 
 def print_usage():
     print(
-        "Usage: python run.py <model_type> [dataset] [-p] [-e] [--bleu] [--rouge] [--all]"
+        "Usage: python run.py <model_type> [dataset] [-p] [-e] [--bleu] [--rouge] [--bertscore] [--all]"
     )
     print("Options:")
     print(
@@ -75,6 +75,7 @@ def print_usage():
     print("  -e, --evaluations     Run evaluations.")
     print("  --bleu                Run BLEU metric evaluation.")
     print("  --rouge               Run ROUGE metric evaluation.")
+    print("  --bertscore           Run BERTScore metric evaluation.")
     print("  --all                 Run all metrics evaluation.")
     print("By default, only evaluations are run if no options are provided.\n")
     print("===================================================================\n\n")
@@ -180,6 +181,29 @@ def evaluate_model_results(model_name, model_type, dataset, metrics):
         # Remove temporary ROUGE results file
         os.remove(rouge_output_path)
 
+    # Evaluate BERTScore
+    if "bertscore" in metrics:
+        bertscore_output_path = os.path.join(
+            eval_results_dir, model_type, f"{model_name}_bertscore_results.json"
+        )
+        command_bertscore = [
+            "python",
+            bertscore_script,
+            predictions_path,
+            squad_data_path if dataset == "SQuAD" else germanquad_data_path,
+            bertscore_output_path,
+        ]
+        logger.info(f"Evaluating BERTScore for {model_name}...")
+        subprocess.run(command_bertscore)
+        logger.info(f"BERTScore evaluation for {model_name} completed.")
+
+        with open(bertscore_output_path, "r") as f:
+            bertscore_results = json.load(f)
+            results["bertscore"] = bertscore_results
+
+        # Remove temporary BERTScore results file
+        os.remove(bertscore_output_path)
+
     # Save combined results
     with open(eval_output_path, "w") as f:
         json.dump(results, f, indent=2)
@@ -213,6 +237,9 @@ if __name__ == "__main__":
         "--rouge", action="store_true", help="Run ROUGE metric evaluation."
     )
     parser.add_argument(
+        "--bertscore", action="store_true", help="Run BERTScore metric evaluation."
+    )
+    parser.add_argument(
         "--all", action="store_true", help="Run all metrics evaluation."
     )
 
@@ -225,7 +252,7 @@ if __name__ == "__main__":
 
     metrics_to_run = []
     if args.all:
-        metrics_to_run = ["evaluate-v2", "bleu", "rouge"]
+        metrics_to_run = ["evaluate-v2", "bleu", "rouge", "bertscore"]
     else:
         if args.evaluations:
             metrics_to_run.append("evaluate-v2")
@@ -233,6 +260,8 @@ if __name__ == "__main__":
             metrics_to_run.append("bleu")
         if args.rouge:
             metrics_to_run.append("rouge")
+        if args.bertscore:
+            metrics_to_run.append("bertscore")
 
     # Determine the dataset to use
     if args.dataset == "G" or "G" in args.model_type:
@@ -260,7 +289,7 @@ if __name__ == "__main__":
         time.sleep(5)  # Adjust the sleep time if needed
 
     # Run evaluations if specified
-    if args.evaluations or args.bleu or args.rouge:
+    if args.evaluations or args.bleu or args.rouge or args.bertscore:
         for model_script in models:
             model_name = model_script.split("/")[1]
             try:
