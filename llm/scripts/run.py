@@ -27,14 +27,15 @@ bertscore_script = os.path.join(metrics_dir, "BERT-score.py")
 model_scripts = {
     "base": [  # German base models (pre-trained)
         # Community Suggestions
-        "tiiuae/falcon-7b",
-        "meta-llama/Meta-Llama-3-8B",  # PENDING access
-        "mistralai/Mixtral-8x7B-v0.1",  # PENDING access
-        "Deci/DeciLM-7B",
+        "tiiuae/falcon-7b-instruct",
+        "mistralai/Mistral-7B-Instruct-v0.1",
+        "meta-llama/Meta-Llama-3-8B-Instruct",  # PENDING access
+        "mistralai/Mixtral-8x7B-Instruct-v0.1",  # PENDING access
+        "Deci/DeciLM-7B-instruct",
         # HuggingFace Leaderboard
-        "BarraHome/Mistroll-7B-v2.2",
-        "yam-peleg/Experiment26-7B",
-        "MTSAIR/multi_verse_model",
+        # "BarraHome/Mistroll-7B-v2.2",
+        # "yam-peleg/Experiment26-7B",
+        # "MTSAIR/multi_verse_model",
     ],
     "Gbase": [  # German base models (pre-trained)
         "philschmid/instruct-igel-001",
@@ -42,16 +43,16 @@ model_scripts = {
         "VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct",
     ],
     "tuned": [  # General models (fine-tuned on SQuAD)
-        "timpal0l/mdeberta-v3-base-squad2",  # ✅
-        "distilbert/distilbert-base-cased-distilled-squad",  # ✅
-        "deepset/roberta-base-squad2",
-        "deepset/roberta-large-squad2",
-        "google-bert/bert-large-cased-whole-word-masking-finetuned-squad",  # ✅
+        # "timpal0l/mdeberta-v3-base-squad2",  # ✅
+        # "distilbert/distilbert-base-cased-distilled-squad",  # ✅
+        # "deepset/roberta-base-squad2",  # ✅
+        # "deepset/roberta-large-squad2",  # ✅
+        # "google-bert/bert-large-cased-whole-word-masking-finetuned-squad",  # ✅
     ],
     "Gtuned": [  # German models (fine-tuned on GermanQuAD)
-        "deepset/gelectra-base-germanquad",  # ✅
-        "deepset/gelectra-large-germanquad",
-        "deutsche-telekom/bert-multi-english-german-squad2",  # ✅
+        # "deepset/gelectra-base-germanquad",  # ✅
+        # "deepset/gelectra-large-germanquad",  # ✅
+        # "deutsche-telekom/bert-multi-english-german-squad2",  # ✅
     ],
 }
 
