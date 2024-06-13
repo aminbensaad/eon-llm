@@ -28,10 +28,10 @@ model_scripts = {
     "base": [  # German base models (pre-trained)
         # Community Suggestions
         "tiiuae/falcon-7b-instruct",
-        "mistralai/Mistral-7B-Instruct-v0.1",
-        "meta-llama/Meta-Llama-3-8B-Instruct",  # PENDING access
-        "mistralai/Mixtral-8x7B-Instruct-v0.1",  # PENDING access
-        "Deci/DeciLM-7B-instruct",
+        #"mistralai/Mistral-7B-Instruct-v0.1",
+        #"meta-llama/Meta-Llama-3-8B-Instruct",  # PENDING access
+        #"mistralai/Mixtral-8x7B-Instruct-v0.1",  # PENDING access
+        #"Deci/DeciLM-7B-instruct",
         # HuggingFace Leaderboard
         # "BarraHome/Mistroll-7B-v2.2",
         # "yam-peleg/Experiment26-7B",
