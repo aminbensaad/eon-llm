@@ -9,10 +9,14 @@ safetensors_files = glob.glob(
     os.path.join(cache_dir, "**/*.safetensors"), recursive=True
 )
 
-# Delete each file
-for file_path in safetensors_files:
-    try:
-        os.remove(file_path)
-        print(f"Removed: {file_path}")
-    except OSError as e:
-        print(f"Error removing {file_path}: {e}")
+# Check if any safetensors files are found
+if not safetensors_files:
+    print("No .safetensors files found.")
+else:
+    # Delete each file
+    for file_path in safetensors_files:
+        try:
+            os.remove(file_path)
+            print(f"Removed: {file_path}")
+        except OSError as e:
+            print(f"Error removing {file_path}: {e}")
