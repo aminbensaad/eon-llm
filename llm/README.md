@@ -22,7 +22,7 @@ With the `eon-llm` environment activated, install the required packages using th
 ```sh
 pip install -r requirements.txt
 ```
-
+cd
 ### Step 4: Test if Packages Have Been Installed Properly
 Run model predictions (`-p`) or (re-)run evaluation metrics (`-e`) for testing, for instance:
 
@@ -40,6 +40,9 @@ This directory covers all LLM-related research directories and files, including:
 
 **eval_results:**
 - The summarized evaluation results for the defined metrics (e.g., BLEU, ROUGE, F1, exact match, ...) in 'metrics'.
+
+**figures:**
+- The resulting figures from our plotting of evaluation results in 'level-0.ipynb'.
 
 **metrics:**
 - The defined metrics to evaluate model results.
