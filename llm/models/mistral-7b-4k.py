@@ -5,6 +5,7 @@ import json
 from tqdm import tqdm
 import sys
 import os
+from awq import AutoAWQForCausalLM
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from scripts.utils import utils
@@ -20,23 +21,10 @@ quantization_config = BitsAndBytesConfig(
     bnb_4bit_use_double_quant=True,
 )
 #Falcon Pipeline
-model_id = "/kaggle/input/mistral/pytorch/7b-v0.1-hf/1"
-model_4bit = AutoModelForCausalLM.from_pretrained(
-    model_id,
-    device_map="auto",
-    quantization_config=quantization_config,
-    torch_dtype=torch.bfloat16,
-    trust_remote_code=True)
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-falcon_pipeline = pipeline(
-    "text-generation",
-    model=model_4bit,
-    tokenizer=tokenizer,
-    torch_dtype=torch.bfloat16,
-    use_cache=True,
-    device_map="auto",
-)
-
+model_id = "TheBloke/Mistral-7B-v0.1-AWQ"
+model = AutoAWQForCausalLM.from_quantized(model_id, fuse_layers=True,
+                                          trust_remote_code=False, safetensors=True)
+tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=False)
 
 def main(input_path, output_path):
     logger.info("Loading the tokenizer and model...")
@@ -68,16 +56,18 @@ def main(input_path, output_path):
 
     def answer_question_with_pipeline(question, context, max_new_tokens=250):
         prompt = f"{question}\n{context}\nAnswer:"
-        sequences = falcon_pipeline(
-            prompt,
-            max_new_tokens=max_new_tokens,
+
+        tokens = tokenizer(prompt, return_tensors='pt').input_ids.cuda()
+        generation_output = model.generate(
+            tokens,
             do_sample=True,
-            top_k=10,
-            num_return_sequences=1,
-            eos_token_id=tokenizer.eos_token_id,
-            pad_token_id=tokenizer.eos_token_id
+            temperature=0.7,
+            top_p=0.95,
+            top_k=40,
+            max_new_tokens=512
         )
-        return sequences[0]["generated_text"].split("Answer:")[1].strip()
+        print(tokenizer.decode(generation_output[0]["generated_text"].split("Answer:")[1]).strip())
+        return tokenizer.decode(generation_output[0]["generated_text"].split("Answer:")[1]).strip()
 
     logger.info("Generating answers for all articles in the dev set...")
     results = []
