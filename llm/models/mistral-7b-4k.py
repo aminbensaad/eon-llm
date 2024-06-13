@@ -13,28 +13,53 @@ from scripts.utils import utils
 logging.basicConfig(level=logging.INFO)  # Changed to INFO for standard output
 logger = logging.getLogger(__name__)
 
-def main(model_name, input_path, output_path):
+#Quantization
+quantization_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_use_double_quant=True,
+)
+#Falcon Pipeline
+model_id = "/kaggle/input/mistral/pytorch/7b-v0.1-hf/1"
+model_4bit = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    device_map="auto",
+    quantization_config=quantization_config,
+    torch_dtype=torch.bfloat16,
+    trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+falcon_pipeline = pipeline(
+    "text-generation",
+    model=model_4bit,
+    tokenizer=tokenizer,
+    torch_dtype=torch.bfloat16,
+    use_cache=True,
+    device_map="auto",
+)
+
+
+def main(input_path, output_path):
     logger.info("Loading the tokenizer and model...")
     utils.check_disk_space()
 
     # Load the tokenizer and model
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    # tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     # Add a padding token if it doesn't exist
     if tokenizer.pad_token is None:
         tokenizer.add_special_tokens({"pad_token": tokenizer.eos_token})
 
-    try:
-        generation_pipeline = pipeline(
-            "text-generation",
-            model=model_name,
-            tokenizer=tokenizer,
-            torch_dtype=torch.bfloat16,
-            device_map="auto",
-        )
-    except Exception as e:
-        logger.error(f"Failed to load model: {e}")
-        return
+    # try:
+        # generation_pipeline = pipeline(
+        #     "text-generation",
+        #     model=model_name,
+        #     tokenizer=tokenizer,
+        #     torch_dtype=torch.bfloat16,
+        #     device_map="auto",
+        # )
+    # except Exception as e:
+        # logger.error(f"Failed to load model: {e}")
+        # return
 
     logger.info(f"Loading dataset from {input_path}...")
     # Load dataset data
@@ -43,13 +68,14 @@ def main(model_name, input_path, output_path):
 
     def answer_question_with_pipeline(question, context, max_new_tokens=250):
         prompt = f"{question}\n{context}\nAnswer:"
-        sequences = generation_pipeline(
+        sequences = falcon_pipeline(
             prompt,
             max_new_tokens=max_new_tokens,
             do_sample=True,
             top_k=10,
             num_return_sequences=1,
             eos_token_id=tokenizer.eos_token_id,
+            pad_token_id=tokenizer.eos_token_id
         )
         return sequences[0]["generated_text"].split("Answer:")[1].strip()
 
@@ -85,12 +111,11 @@ def main(model_name, input_path, output_path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: python script.py <model_name> <input_path> <output_path>")
+    if len(sys.argv) != 3:
+        print("Usage: python script.py input_path> <output_path>")
         sys.exit(1)
 
-    model_name = sys.argv[1]
-    input_path = sys.argv[2]
-    output_path = sys.argv[3]
-    main(model_name, input_path, output_path)
+    input_path = sys.argv[1]
+    output_path = sys.argv[2]
+    main(input_path, output_path)
 
