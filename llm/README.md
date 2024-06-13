@@ -2,6 +2,9 @@
 
 # Project Setup 🛠️
 
+![Setup](https://drive.google.com/uc?id=12fwXHFsfRBz2R1S9WgwP8VADEhVQrTQm)
+
+
 ### Step 1: Create the Conda Environment 'eon-llm'
 First, ensure you have Conda installed (and 'Libmamba' enabled as resolver - much faster). Then run the following commands:
 
