@@ -7,11 +7,12 @@ to the reference text, providing a more semantically informed metric than tradit
 word-overlap metrics.
 
 Usage:
-    python BERT-score.py <predictions_path> <dataset_path> <output_path>
+    python BERT-score.py <predictions_path> <dataset_path> <output_path> [-G]
     
     predictions_path: Path to the JSON file containing the model predictions.
     dataset_path: Path to the JSON file containing the reference dataset (SQuAD format).
     output_path: Path to the JSON file where the BERTScore results will be saved.
+    -G: Optional flag to specify German language support.
 
 Dependencies:
     bert-score (for BERTScore computation)
@@ -54,8 +55,8 @@ def load_data(predictions_file, references_file):
     return candidates, references
 
 
-def calculate_bertscore(candidates, references):
-    P, R, F1 = score(candidates, references, lang="en", verbose=True)
+def calculate_bertscore(candidates, references, lang):
+    P, R, F1 = score(candidates, references, lang=lang, verbose=True)
     return {
         "Precision": P.mean().item(),
         "Recall": R.mean().item(),
@@ -63,9 +64,9 @@ def calculate_bertscore(candidates, references):
     }
 
 
-def main(predictions_path, dataset_path, output_path):
+def main(predictions_path, dataset_path, output_path, lang):
     candidates, references = load_data(predictions_path, dataset_path)
-    bertscore_results = calculate_bertscore(candidates, references)
+    bertscore_results = calculate_bertscore(candidates, references, lang)
 
     with open(output_path, "w") as f:
         json.dump(bertscore_results, f, indent=4)
@@ -74,10 +75,15 @@ def main(predictions_path, dataset_path, output_path):
 
 
 if __name__ == "__main__":
+    # Check for the optional -G flag
+    is_german = "-G" in sys.argv
+    if is_german:
+        sys.argv.remove("-G")
+
     # Ensure the correct number of arguments are provided
     if len(sys.argv) != 4:
         print(
-            "Usage: python BERT-score.py <predictions_path> <dataset_path> <output_path>"
+            "Usage: python BERT-score.py <predictions_path> <dataset_path> <output_path> [-G]"
         )
         sys.exit(1)
 
@@ -86,5 +92,8 @@ if __name__ == "__main__":
     dataset_path = sys.argv[2]
     output_path = sys.argv[3]
 
+    # Set language for BERTScore
+    lang = "de" if is_german else "en"
+
     # Run the main function
-    main(predictions_path, dataset_path, output_path)
+    main(predictions_path, dataset_path, output_path, lang)
