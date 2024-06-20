@@ -4,9 +4,13 @@ import time
 import logging
 import argparse
 import json
+import sys
 
 # Ensure the script is running in the "llm/scripts" directory
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from scripts.utils import utils
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -18,17 +22,15 @@ data_dir = os.path.join(base, "data")
 model_results_dir = os.path.join(base, "model_results")
 eval_results_dir = os.path.join(base, "eval_results")
 metrics_dir = os.path.join(base, "metrics")
-eval_script = os.path.join(metrics_dir, "evaluate-v2.0.py")
-bleu_script = os.path.join(metrics_dir, "bleu.py")
-rouge_script = os.path.join(metrics_dir, "rouge.py")
-bertscore_script = os.path.join(metrics_dir, "BERT-score.py")
+model_dir = os.path.join(base, "models")
 
 # Define models to run
-model_scripts = {
+model_IDs = {
     "base": [  # German base models (pre-trained)
         # Community Suggestions
+        "TheBloke/mistral-ft-optimized-1227-GGUF",
         # "tiiuae/falcon-7b-instruct", # ✅
-        "gradientai/Llama-3-8B-Instruct-Gradient-1048k"
+        # "gradientai/Llama-3-8B-Instruct-Gradient-1048k"
         # "nvidia/Llama3-ChatQA-1.5-8B",  # ✅
         # "mistralai/Mistral-7B-Instruct-v0.1",
         # "meta-llama/Meta-Llama-3-8B-Instruct",  # PENDING access
@@ -40,9 +42,10 @@ model_scripts = {
         # "MTSAIR/multi_verse_model",
     ],
     "Gbase": [  # German base models (pre-trained)
-        "philschmid/instruct-igel-001",
-        "TheBloke/em_german_leo_mistral-GGUF",
-        "VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct",
+        # "philschmid/instruct-igel-001",
+        # "TheBloke/em_german_leo_mistral-GGUF",
+        # "VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct",
+        # "TheBloke/DiscoLM_German_7b_v1-GGUF",
     ],
     "tuned": [  # General models (fine-tuned on SQuAD)
         # "timpal0l/mdeberta-v3-base-squad2",  # ✅
@@ -82,134 +85,6 @@ def print_usage():
     print("  --all                 Run all metrics evaluation.")
     print("By default, only evaluations are run if no options are provided.\n")
     print("===================================================================\n\n")
-
-
-# Function to run a model script
-def run_model_script(model_name, model_type, input_path, output_path):
-    script_name = "tuned.py" if "tuned" in model_type else "base.py"
-    command = ["python", script_name, model_name, input_path, output_path]
-
-    logger.info(f"Running {script_name} for {model_name}...")
-    subprocess.run(command)
-    logger.info(f"{script_name} for {model_name} completed.")
-
-
-# Function to evaluate the model results
-def evaluate_model_results(model_name, model_type, dataset, metrics):
-    predictions_path = os.path.join(
-        model_results_dir, model_type, f"{model_name}_predictions.json"
-    )
-    eval_output_path = os.path.join(
-        eval_results_dir, model_type, f"{model_name}_eval_results.json"
-    )
-
-    if not os.path.exists(predictions_path):
-        logger.warning(
-            f"Predictions file for {model_name} not found. Skipping evaluation."
-        )
-        return
-
-    os.makedirs(os.path.dirname(eval_output_path), exist_ok=True)
-
-    # Load existing results if they exist
-    if os.path.exists(eval_output_path):
-        with open(eval_output_path, "r") as f:
-            results = json.load(f)
-    else:
-        results = {}
-
-    # Evaluate using evaluate-v2.0.py
-    if "evaluate-v2" in metrics:
-        command = [
-            "python",
-            eval_script,
-            squad_data_path if dataset == "SQuAD" else germanquad_data_path,
-            predictions_path,
-            "--out-file",
-            eval_output_path,
-            "--na-prob-thresh",
-            "0.5",
-        ]
-        logger.info(f"Evaluating evaluate-v2 for {model_name}...")
-        subprocess.run(command)
-        logger.info(f"Evaluate-v2 evaluation for {model_name} completed.")
-
-        with open(eval_output_path, "r") as f:
-            eval_results = json.load(f)
-            results["evaluate-v2"] = eval_results
-
-    # Evaluate BLEU
-    if "bleu" in metrics:
-        bleu_output_path = os.path.join(
-            eval_results_dir, model_type, f"{model_name}_bleu_results.json"
-        )
-        command_bleu = [
-            "python",
-            bleu_script,
-            predictions_path,
-            squad_data_path if dataset == "SQuAD" else germanquad_data_path,
-            bleu_output_path,
-        ]
-        logger.info(f"Evaluating BLEU for {model_name}...")
-        subprocess.run(command_bleu)
-        logger.info(f"BLEU evaluation for {model_name} completed.")
-
-        with open(bleu_output_path, "r") as f:
-            bleu_results = json.load(f)
-            results["bleu"] = bleu_results
-
-        # Remove temporary BLEU results file
-        os.remove(bleu_output_path)
-
-    # Evaluate ROUGE
-    if "rouge" in metrics:
-        rouge_output_path = os.path.join(
-            eval_results_dir, model_type, f"{model_name}_rouge_results.json"
-        )
-        command_rouge = [
-            "python",
-            rouge_script,
-            predictions_path,
-            squad_data_path if dataset == "SQuAD" else germanquad_data_path,
-            rouge_output_path,
-        ]
-        logger.info(f"Evaluating ROUGE for {model_name}...")
-        subprocess.run(command_rouge)
-        logger.info(f"ROUGE evaluation for {model_name} completed.")
-
-        with open(rouge_output_path, "r") as f:
-            rouge_results = json.load(f)
-            results["rouge"] = rouge_results
-
-        # Remove temporary ROUGE results file
-        os.remove(rouge_output_path)
-
-    # Evaluate BERTScore
-    if "bertscore" in metrics:
-        bertscore_output_path = os.path.join(
-            eval_results_dir, model_type, f"{model_name}_bertscore_results.json"
-        )
-        command_bertscore = [
-            "python",
-            bertscore_script,
-            predictions_path,
-            squad_data_path if dataset == "SQuAD" else germanquad_data_path,
-            bertscore_output_path,
-        ]
-        logger.info(f"Evaluating BERTScore for {model_name}...")
-        subprocess.run(command_bertscore)
-        logger.info(f"BERTScore evaluation for {model_name} completed.")
-
-        with open(bertscore_output_path, "r") as f:
-            bertscore_results = json.load(f)
-            results["bertscore"] = bertscore_results
-
-        # Remove temporary BERTScore results file
-        os.remove(bertscore_output_path)
-
-    # Save combined results
-    with open(eval_output_path, "w") as f:
-        json.dump(results, f, indent=2)
 
 
 if __name__ == "__main__":
@@ -267,25 +142,29 @@ if __name__ == "__main__":
             metrics_to_run.append("bertscore")
 
     # Determine the dataset to use
-    if args.dataset == "G" or "G" in args.model_type:
+    isGerman = args.dataset == "G" or "G" in args.model_type
+    if isGerman:
         dataset = "GermanQuAD"
         input_path = germanquad_data_path
     else:
         dataset = "SQuAD"
         input_path = squad_data_path
-
+    suffix = "_G" if isGerman else ""
     model_type = args.model_type
-    models = model_scripts[model_type]
+    models = model_IDs[model_type]
 
     # Run predictions if specified
     if args.predictions:
-        for model_script in models:
-            model_name = model_script.split("/")[1]
-            output_path = os.path.join(
-                model_results_dir, model_type, f"{model_name}_predictions.json"
-            )
+        for model_ID in models:
+            model_name = model_ID.split("/")[1]
+            output_file_name = f"{model_name}{suffix}_predictions.json"
+            output_path = os.path.join(model_results_dir, model_type, output_file_name)
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            run_model_script(model_script, model_type, input_path, output_path)
+            script = os.path.join(model_dir, model_type, f"{model_name}.py")
+
+            logger.info("Checking disk space...")
+            utils.check_disk_space()
+            utils.run_model_script(script, model_ID, input_path, output_path)
 
     # Wait for results to appear in model_results (if necessary)
     if args.predictions:
@@ -293,9 +172,31 @@ if __name__ == "__main__":
 
     # Run evaluations if specified
     if args.evaluations or args.bleu or args.rouge or args.bertscore:
-        for model_script in models:
-            model_name = model_script.split("/")[1]
+        for model_ID in models:
+            model_name = model_ID.split("/")[1]
             try:
-                evaluate_model_results(model_name, model_type, dataset, metrics_to_run)
+                predictions_path = os.path.join(
+                    model_results_dir,
+                    model_type,
+                    f"{model_name}{suffix}_predictions.json",
+                )
+                eval_output_path = os.path.join(
+                    eval_results_dir,
+                    model_type,
+                    f"{model_name}{suffix}_eval_results.json",
+                )
+                test_data_path = (
+                    squad_data_path if dataset == "SQuAD" else germanquad_data_path
+                )
+                utils.evaluate_model_results(
+                    metrics_dir,
+                    eval_results_dir,
+                    predictions_path,
+                    eval_output_path,
+                    model_name,
+                    model_type,
+                    test_data_path,
+                    metrics_to_run,
+                )
             except Exception as e:
                 logger.warning(f"Failed to evaluate model {model_name}: {e}")

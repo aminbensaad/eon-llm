@@ -10,16 +10,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def main(input_path, output_path):
+def main(model_name, input_path, output_path):
     logger.info("Loading the tokenizer and model...")
 
     # Load the tokenizer and model
-    tokenizer = AutoTokenizer.from_pretrained(
-        "bert-large-uncased-whole-word-masking-finetuned-squad"
-    )
-    model = AutoModelForQuestionAnswering.from_pretrained(
-        "bert-large-uncased-whole-word-masking-finetuned-squad"
-    )
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForQuestionAnswering.from_pretrained(model_name)
     model.eval()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -94,6 +90,7 @@ def main(input_path, output_path):
 
 
 if __name__ == "__main__":
-    input_path = sys.argv[1]
-    output_path = sys.argv[2]
-    main(input_path, output_path)
+    model_name = sys.argv[1]
+    input_path = sys.argv[2]
+    output_path = sys.argv[3]
+    main(model_name, input_path, output_path)
