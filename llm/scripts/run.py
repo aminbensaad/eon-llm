@@ -4,9 +4,13 @@ import time
 import logging
 import argparse
 import json
+import sys
 
 # Ensure the script is running in the "llm/scripts" directory
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from scripts.utils import utils
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -18,17 +22,19 @@ data_dir = os.path.join(base, "data")
 model_results_dir = os.path.join(base, "model_results")
 eval_results_dir = os.path.join(base, "eval_results")
 metrics_dir = os.path.join(base, "metrics")
+model_dir = os.path.join(base, "models")
 eval_script = os.path.join(metrics_dir, "evaluate-v2.0.py")
 bleu_script = os.path.join(metrics_dir, "bleu.py")
 rouge_script = os.path.join(metrics_dir, "rouge.py")
 bertscore_script = os.path.join(metrics_dir, "BERT-score.py")
 
 # Define models to run
-model_scripts = {
+model_IDs = {
     "base": [  # German base models (pre-trained)
         # Community Suggestions
+        "TheBloke/mistral-ft-optimized-1227-GGUF",
         # "tiiuae/falcon-7b-instruct", # ✅
-        "gradientai/Llama-3-8B-Instruct-Gradient-1048k"
+        # "gradientai/Llama-3-8B-Instruct-Gradient-1048k"
         # "nvidia/Llama3-ChatQA-1.5-8B",  # ✅
         # "mistralai/Mistral-7B-Instruct-v0.1",
         # "meta-llama/Meta-Llama-3-8B-Instruct",  # PENDING access
@@ -40,15 +46,16 @@ model_scripts = {
         # "MTSAIR/multi_verse_model",
     ],
     "Gbase": [  # German base models (pre-trained)
-        "philschmid/instruct-igel-001",
-        "TheBloke/em_german_leo_mistral-GGUF",
-        "VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct",
+        # "philschmid/instruct-igel-001",
+        # "TheBloke/em_german_leo_mistral-GGUF",
+        # "VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct",
+        # "TheBloke/DiscoLM_German_7b_v1-GGUF",
     ],
     "tuned": [  # General models (fine-tuned on SQuAD)
         # "timpal0l/mdeberta-v3-base-squad2",  # ✅
         # "distilbert/distilbert-base-cased-distilled-squad",  # ✅
         # "deepset/roberta-base-squad2",  # ✅
-        # "deepset/roberta-large-squad2",  # ✅
+        "deepset/roberta-large-squad2",  # ✅
         # "google-bert/bert-large-cased-whole-word-masking-finetuned-squad",  # ✅
     ],
     "Gtuned": [  # German models (fine-tuned on GermanQuAD)
@@ -85,13 +92,21 @@ def print_usage():
 
 
 # Function to run a model script
-def run_model_script(model_name, model_type, input_path, output_path):
-    script_name = "tuned.py" if "tuned" in model_type else "base.py"
-    command = ["python", script_name, model_name, input_path, output_path]
+def run_model_script(model_ID, model_name, model_type, input_path, output_path):
+    logger.info("Checking disk space...")
+    utils.check_disk_space()
 
-    logger.info(f"Running {script_name} for {model_name}...")
-    subprocess.run(command)
-    logger.info(f"{script_name} for {model_name} completed.")
+    script_name = os.path.join(model_dir, model_type, f"{model_name}.py")
+    if os.path.exists(script_name):
+        command = ["python", script_name, model_ID, input_path, output_path]
+        logger.info(f"Running {script_name} for {model_ID}...")
+        try:
+            subprocess.run(command, check=True)
+            logger.info(f"{script_name} for {model_ID} completed.")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error running {script_name} for {model_ID}: {e}")
+    else:
+        logger.error(f"Script {script_name} does not exist. Skipping {model_ID}.")
 
 
 # Function to evaluate the model results
@@ -267,7 +282,8 @@ if __name__ == "__main__":
             metrics_to_run.append("bertscore")
 
     # Determine the dataset to use
-    if args.dataset == "G" or "G" in args.model_type:
+    isGerman = args.dataset == "G" or "G" in args.model_type
+    if isGerman:
         dataset = "GermanQuAD"
         input_path = germanquad_data_path
     else:
@@ -275,17 +291,18 @@ if __name__ == "__main__":
         input_path = squad_data_path
 
     model_type = args.model_type
-    models = model_scripts[model_type]
+    models = model_IDs[model_type]
 
     # Run predictions if specified
     if args.predictions:
-        for model_script in models:
-            model_name = model_script.split("/")[1]
-            output_path = os.path.join(
-                model_results_dir, model_type, f"{model_name}_predictions.json"
-            )
+        for model_ID in models:
+            model_name = model_ID.split("/")[1]
+
+            suffix = "_G" if isGerman else ""
+            output_file_name = f"{model_name}{suffix}_predictions.json"
+            output_path = os.path.join(model_results_dir, model_type, output_file_name)
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            run_model_script(model_script, model_type, input_path, output_path)
+            run_model_script(model_ID, model_name, model_type, input_path, output_path)
 
     # Wait for results to appear in model_results (if necessary)
     if args.predictions:
@@ -293,8 +310,8 @@ if __name__ == "__main__":
 
     # Run evaluations if specified
     if args.evaluations or args.bleu or args.rouge or args.bertscore:
-        for model_script in models:
-            model_name = model_script.split("/")[1]
+        for model_ID in models:
+            model_name = model_ID.split("/")[1]
             try:
                 evaluate_model_results(model_name, model_type, dataset, metrics_to_run)
             except Exception as e:
