@@ -3,6 +3,7 @@ import shutil
 import os
 import json
 import matplotlib.pyplot as plt
+import subprocess
 
 
 logging.basicConfig(level=logging.INFO)
@@ -51,3 +52,117 @@ def plot_answer_length_distribution(base_dir):
     plt.title("Distribution of Answer Lengths Across All Files")
     plt.grid(True)
     plt.show()
+
+
+# Function to run a model script
+def run_model_script(script, model_ID, input_path, output_path):
+    if os.path.exists(script):
+        command = ["python", script, model_ID, input_path, output_path]
+        logger.info(f"Running {script} for {model_ID}...")
+        try:
+            subprocess.run(command, check=True)
+            logger.info(f"{script} for {model_ID} completed.")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error running {script} for {model_ID}: {e}")
+    else:
+        logger.error(f"Script {script} does not exist. Skipping {model_ID}.")
+
+
+# Function to evaluate the model results
+def evaluate_model_results(
+    metrics_dir,
+    eval_results_dir,
+    predictions_path,
+    eval_output_path,
+    model_name,
+    model_type,
+    dataset,
+    metrics,
+):
+    # Scripts
+    eval_script = os.path.join(metrics_dir, "evaluate-v2.0.py")
+    bleu_script = os.path.join(metrics_dir, "bleu.py")
+    rouge_script = os.path.join(metrics_dir, "rouge.py")
+    bertscore_script = os.path.join(metrics_dir, "BERT-score.py")
+
+    if not os.path.exists(predictions_path):
+        logger.warning(
+            f"Predictions file for {model_name} not found. Skipping evaluation."
+        )
+        return
+
+    os.makedirs(os.path.dirname(eval_output_path), exist_ok=True)
+
+    # Load existing results if they exist
+    if os.path.exists(eval_output_path):
+        with open(eval_output_path, "r") as f:
+            results = json.load(f)
+    else:
+        results = {}
+
+    isGermanQuAD = "German" in dataset
+
+    def save_results():
+        with open(eval_output_path, "w") as f:
+            json.dump(results, f, indent=2)
+
+    def evaluate_metric(script, metric_name, output_file_suffix, extra_args=None):
+        output_path = os.path.join(
+            eval_results_dir,
+            model_type,
+            f"{model_name}_{output_file_suffix}_results.json",
+        )
+        command = ["python", script, predictions_path, dataset, output_path]
+        if extra_args:
+            command.extend(extra_args)
+        logger.info(f"Evaluating {metric_name} for {model_name}...")
+        subprocess.run(command)
+        logger.info(f"{metric_name} evaluation for {model_name} completed.")
+
+        with open(output_path, "r") as f:
+            metric_results = json.load(f)
+            results[metric_name] = metric_results
+
+        # Save results after each metric evaluation
+        save_results()
+
+        # Remove temporary results file
+        os.remove(output_path)
+
+    # Evaluate using evaluate-v2.0.py
+    if "evaluate-v2" in metrics:
+        command = [
+            "python",
+            eval_script,
+            dataset,
+            predictions_path,
+            "--out-file",
+            eval_output_path,
+            "--na-prob-thresh",
+            "0.5",
+        ]
+        logger.info(f"Evaluating evaluate-v2 for {model_name}...")
+        subprocess.run(command)
+        logger.info(f"Evaluate-v2 evaluation for {model_name} completed.")
+
+        with open(eval_output_path, "r") as f:
+            eval_results = json.load(f)
+            results["evaluate-v2"] = eval_results
+
+        save_results()
+
+    # Evaluate BLEU
+    if "bleu" in metrics:
+        evaluate_metric(bleu_script, "bleu", "bleu")
+
+    # Evaluate ROUGE
+    if "rouge" in metrics:
+        evaluate_metric(rouge_script, "rouge", "rouge")
+
+    # Evaluate BERTScore
+    if "bertscore" in metrics:
+        extra_args = ["-G"] if isGermanQuAD else None
+        evaluate_metric(bertscore_script, "bertscore", "bertscore", extra_args)
+
+    # Save combined results at the end just in case
+    save_results()
