@@ -2,12 +2,7 @@ import logging
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import json
 from tqdm import tqdm
-import sys
-import os
 import torch
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from scripts.utils import utils
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -15,8 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 def main(model_name, input_path, output_path):
-    logger.info("Checking disk space...")
-    utils.check_disk_space()
 
     logger.info("Loading the model and tokenizer...")
     # Load the model and tokenizer
