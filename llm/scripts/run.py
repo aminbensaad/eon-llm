@@ -1,9 +1,7 @@
 import os
-import subprocess
 import time
 import logging
 import argparse
-import json
 import sys
 
 # Ensure the script is running in the "llm/scripts" directory
@@ -33,7 +31,7 @@ model_IDs = {
         # "gradientai/Llama-3-8B-Instruct-Gradient-1048k"
         # "nvidia/Llama3-ChatQA-1.5-8B",  # ✅
         # "mistralai/Mistral-7B-Instruct-v0.1",
-        # "meta-llama/Meta-Llama-3-8B-Instruct",  # PENDING access
+        # "meta-llama/Meta-Llama-3-8B-Instruct",
         # "mistralai/Mixtral-8x7B-Instruct-v0.1",  # PENDING access
         # "Deci/DeciLM-7B-instruct",
         # HuggingFace Leaderboard
@@ -44,7 +42,7 @@ model_IDs = {
     "Gbase": [  # German base models (pre-trained)
         # "philschmid/instruct-igel-001",
         # "TheBloke/em_german_leo_mistral-GGUF",
-        # "VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct",
+        "VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct",
         # "TheBloke/DiscoLM_German_7b_v1-GGUF",
     ],
     "tuned": [  # General models (fine-tuned on SQuAD)
