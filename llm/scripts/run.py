@@ -21,6 +21,7 @@ model_results_dir = os.path.join(base, "model_results")
 eval_results_dir = os.path.join(base, "eval_results")
 metrics_dir = os.path.join(base, "metrics")
 model_dir = os.path.join(base, "models")
+local_model_dir = os.path.join(base, "local_models")
 
 # Define models to run
 model_IDs = {
@@ -51,6 +52,7 @@ model_IDs = {
         # "deepset/roberta-base-squad2",  # ✅
         # "deepset/roberta-large-squad2",  # ✅
         # "google-bert/bert-large-cased-whole-word-masking-finetuned-squad",  # ✅
+        # os.path.join(local_model_dir, "bert-finetuned-squad/checkpoint-33276") # ✅
     ],
     "Gtuned": [  # German models (fine-tuned on GermanQuAD)
         # "deepset/gelectra-base-germanquad",  # ✅
@@ -58,6 +60,15 @@ model_IDs = {
         # "deutsche-telekom/bert-multi-english-german-squad2",  # ✅
     ],
 }
+
+
+def model_name_from_id(model_id: str):
+    model_id_components = model_id.split("/")
+    if len(model_id_components) > 2:
+        return model_id_components[-2]
+    else:
+        return model_id_components[-1]
+
 
 # Define dataset paths
 squad_data_path = os.path.join(data_dir, "SQuAD/dev-v2.0.json")
@@ -154,7 +165,7 @@ if __name__ == "__main__":
     # Run predictions if specified
     if args.predictions:
         for model_ID in models:
-            model_name = model_ID.split("/")[1]
+            model_name = model_name_from_id(model_ID)
             output_file_name = f"{model_name}{suffix}_predictions.json"
             output_path = os.path.join(model_results_dir, model_type, output_file_name)
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -171,7 +182,7 @@ if __name__ == "__main__":
     # Run evaluations if specified
     if args.evaluations or args.bleu or args.rouge or args.bertscore:
         for model_ID in models:
-            model_name = model_ID.split("/")[1]
+            model_name = model_name_from_id(model_ID)
             try:
                 predictions_path = os.path.join(
                     model_results_dir,
