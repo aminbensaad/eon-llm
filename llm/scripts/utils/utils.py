@@ -166,3 +166,20 @@ def evaluate_model_results(
 
     # Save combined results at the end just in case
     save_results()
+
+
+def store_timing_results(timing_results_path, model_name, dataset, elapsed_time):
+    # Initialize timing results dictionary
+    timing_results = {}
+    if os.path.exists(timing_results_path):
+        with open(timing_results_path, "r") as f:
+            timing_results = json.load(f)
+
+    # Store timing results
+    if model_name not in timing_results:
+        timing_results[model_name] = {}
+    timing_results[model_name][dataset] = elapsed_time
+
+    # Save timing results
+    with open(timing_results_path, "w") as f:
+        json.dump(timing_results, f, indent=4)
