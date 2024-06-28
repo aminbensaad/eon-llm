@@ -3,6 +3,7 @@ import time
 import logging
 import argparse
 import sys
+import json
 
 # Ensure the script is running in the "llm/scripts" directory
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -21,11 +22,11 @@ model_results_dir = os.path.join(base, "model_results")
 eval_results_dir = os.path.join(base, "eval_results")
 metrics_dir = os.path.join(base, "metrics")
 model_dir = os.path.join(base, "models")
+timing_results_path = os.path.join(base, "timing_results.json")
 
 # Define models to run
 model_IDs = {
     "base": [  # German base models (pre-trained)
-        # Community Suggestions
         "TheBloke/mistral-ft-optimized-1227-GGUF",
         # "tiiuae/falcon-7b-instruct", # ✅
         # "gradientai/Llama-3-8B-Instruct-Gradient-1048k"
@@ -46,6 +47,7 @@ model_IDs = {
         # "TheBloke/DiscoLM_German_7b_v1-GGUF",
     ],
     "tuned": [  # General models (fine-tuned on SQuAD)
+        "deepset/xlm-roberta-base-squad2",
         # "timpal0l/mdeberta-v3-base-squad2",  # ✅
         # "distilbert/distilbert-base-cased-distilled-squad",  # ✅
         # "deepset/roberta-base-squad2",  # ✅
@@ -162,7 +164,15 @@ if __name__ == "__main__":
 
             logger.info("Checking disk space...")
             utils.check_disk_space()
+            start_time = time.time()
             utils.run_model_script(script, model_ID, input_path, output_path)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+
+            # Store timing results
+            utils.store_timing_results(
+                timing_results_path, model_name, dataset, elapsed_time
+            )
 
     # Wait for results to appear in model_results (if necessary)
     if args.predictions:
