@@ -1,7 +1,7 @@
 {
     "distilbert-base-cased-distilled-squad": {
-        "SQuAD": 1173.5140211582184,
-        "G": 619.3691289424896
+        "SQuAD": 1097.9897339344025,
+        "G": 571.1615948677063
     },
     "bert-large-cased-whole-word-masking-finetuned-squad": {
         "SQuAD": 6126.959834814072,
