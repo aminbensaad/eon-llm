@@ -281,7 +281,7 @@ def answer_question_with_sliding_window(
 
 
 def generate_answers_with_sliding_window(
-    model_name, input_path, output_path, use_token_type_ids=True
+    model_name, input_path, output_path, use_token_type_ids=True, max_length=512
 ):
     tokenizer, model, device = load_model_and_tokenizer(model_name)
     dataset_data = load_dataset(input_path)
@@ -295,7 +295,13 @@ def generate_answers_with_sliding_window(
                 question = qa["question"]
                 id_ = qa["id"]
                 answer = answer_question_with_sliding_window(
-                    tokenizer, model, device, question, context, use_token_type_ids
+                    tokenizer,
+                    model,
+                    device,
+                    question,
+                    context,
+                    use_token_type_ids,
+                    max_length,
                 )
                 results.append({"id": id_, "answer": answer})
 
