@@ -75,6 +75,7 @@ def evaluate_model_results(
     metrics_dir,
     eval_results_dir,
     predictions_path,
+    eval_output_path,
     model_name,
     model_type,
     dataset,
@@ -92,9 +93,6 @@ def evaluate_model_results(
         )
         return
 
-    eval_output_path = os.path.join(
-        eval_results_dir, model_type, f"{model_name}_eval_results.json"
-    )
     os.makedirs(os.path.dirname(eval_output_path), exist_ok=True)
 
     # Load existing results if they exist
@@ -104,8 +102,7 @@ def evaluate_model_results(
     else:
         results = {}
 
-    if dataset not in results:
-        results[dataset] = {}
+    isGermanQuAD = "German" in dataset
 
     def save_results():
         with open(eval_output_path, "w") as f:
@@ -120,17 +117,13 @@ def evaluate_model_results(
         command = ["python", script, predictions_path, dataset, output_path]
         if extra_args:
             command.extend(extra_args)
-        logger.info(
-            f"Evaluating {metric_name} for {model_name} on {dataset} dataset..."
-        )
+        logger.info(f"Evaluating {metric_name} for {model_name}...")
         subprocess.run(command)
-        logger.info(
-            f"{metric_name} evaluation for {model_name} on {dataset} dataset completed."
-        )
+        logger.info(f"{metric_name} evaluation for {model_name} completed.")
 
         with open(output_path, "r") as f:
             metric_results = json.load(f)
-            results[dataset][metric_name] = metric_results
+            results[metric_name] = metric_results
 
         # Save results after each metric evaluation
         save_results()
@@ -150,15 +143,13 @@ def evaluate_model_results(
             "--na-prob-thresh",
             "0.5",
         ]
-        logger.info(f"Evaluating evaluate-v2 for {model_name} on {dataset} dataset...")
+        logger.info(f"Evaluating evaluate-v2 for {model_name}...")
         subprocess.run(command)
-        logger.info(
-            f"Evaluate-v2 evaluation for {model_name} on {dataset} dataset completed."
-        )
+        logger.info(f"Evaluate-v2 evaluation for {model_name} completed.")
 
         with open(eval_output_path, "r") as f:
             eval_results = json.load(f)
-            results[dataset]["evaluate-v2"] = eval_results
+            results["evaluate-v2"] = eval_results
 
         save_results()
 
@@ -172,7 +163,7 @@ def evaluate_model_results(
 
     # Evaluate BERTScore
     if "bertscore" in metrics:
-        extra_args = ["-G"] if dataset == "G" else None
+        extra_args = ["-G"] if isGermanQuAD else None
         evaluate_metric(bertscore_script, "bertscore", "bertscore", extra_args)
 
     # Save combined results at the end just in case
