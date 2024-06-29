@@ -26,10 +26,10 @@ timing_results_path = os.path.join(base, "timing_results.json")
 # Define models to run
 model_IDs = {
     "base": [  # German base models (pre-trained)
-        "TheBloke/mistral-ft-optimized-1227-GGUF",
-        # "tiiuae/falcon-7b-instruct", # ✅
+        # "TheBloke/mistral-ft-optimized-1227-GGUF",
+        "tiiuae/falcon-7b-instruct",  # ✅
         # "gradientai/Llama-3-8B-Instruct-Gradient-1048k"
-        # "nvidia/Llama3-ChatQA-1.5-8B",  # ✅
+        "nvidia/Llama3-ChatQA-1.5-8B",  # ✅
         # "mistralai/Mistral-7B-Instruct-v0.1",
         # "meta-llama/Meta-Llama-3-8B-Instruct",
         # "mistralai/Mixtral-8x7B-Instruct-v0.1",  # PENDING access
@@ -200,17 +200,16 @@ if __name__ == "__main__":
                         eval_output_path = os.path.join(
                             eval_results_dir,
                             model_type,
-                            f"{model_name}{suffix}_eval_results.json",
+                            f"{model_name}_eval_results.json",
                         )
                         test_data_path = input_path
                         utils.evaluate_model_results(
                             metrics_dir,
                             eval_results_dir,
                             predictions_path,
-                            eval_output_path,
                             model_name,
                             model_type,
-                            test_data_path,
+                            dataset,
                             metrics_to_run,
                         )
                     except Exception as e:
