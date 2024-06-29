@@ -188,29 +188,38 @@ if __name__ == "__main__":
 
             # Run evaluations if specified
             if args.evaluations or args.bleu or args.rouge or args.bertscore:
-                for model_ID in models:
-                    model_name = model_ID.split("/")[1]
-                    try:
-                        predictions_path = os.path.join(
-                            model_results_dir,
-                            model_type,
-                            f"{model_name}{suffix}_predictions.json",
-                        )
-                        eval_output_path = os.path.join(
-                            eval_results_dir,
-                            model_type,
-                            f"{model_name}{suffix}_eval_results.json",
-                        )
-                        test_data_path = input_path
-                        utils.evaluate_model_results(
-                            metrics_dir,
-                            eval_results_dir,
-                            predictions_path,
-                            eval_output_path,
-                            model_name,
-                            model_type,
-                            test_data_path,
-                            metrics_to_run,
-                        )
-                    except Exception as e:
-                        logger.warning(f"Failed to evaluate model {model_name}: {e}")
+                for model_type in args.model_types:
+                    for dataset_key in args.datasets:
+                        dataset = dataset_key
+                        input_path = datasets[dataset_key]
+                        suffix = "_G" if dataset_key == "G" else ""
+                        models = model_IDs[model_type]
+
+                        for model_ID in models:
+                            model_name = model_ID.split("/")[1]
+                            try:
+                                predictions_path = os.path.join(
+                                    model_results_dir,
+                                    model_type,
+                                    f"{model_name}{suffix}_predictions.json",
+                                )
+                                eval_output_path = os.path.join(
+                                    eval_results_dir,
+                                    model_type,
+                                    f"{model_name}_eval_results.json",
+                                )
+                                utils.evaluate_model_results(
+                                    metrics_dir,
+                                    eval_results_dir,
+                                    predictions_path,
+                                    eval_output_path,
+                                    model_name,
+                                    model_type,
+                                    dataset,
+                                    input_path,
+                                    metrics_to_run,
+                                )
+                            except Exception as e:
+                                logger.warning(
+                                    f"Failed to evaluate model {model_name}: {e}"
+                                )
