@@ -79,6 +79,7 @@ def evaluate_model_results(
     model_name,
     model_type,
     dataset,
+    dataset_file_path,
     metrics,
 ):
     # Scripts
@@ -102,28 +103,37 @@ def evaluate_model_results(
     else:
         results = {}
 
-    isGermanQuAD = "German" in dataset
+    if dataset not in results:
+        results[dataset] = {}
 
     def save_results():
         with open(eval_output_path, "w") as f:
             json.dump(results, f, indent=2)
 
-    def evaluate_metric(script, metric_name, output_file_suffix, extra_args=None):
+    def evaluate_metric(script, metric_name, extra_args=None):
         output_path = os.path.join(
             eval_results_dir,
             model_type,
-            f"{model_name}_{output_file_suffix}_results.json",
+            f"{model_name}_{dataset}_{metric_name}_results.json",
         )
-        command = ["python", script, predictions_path, dataset, output_path]
+        command = ["python", script, predictions_path, dataset_file_path, output_path]
         if extra_args:
             command.extend(extra_args)
-        logger.info(f"Evaluating {metric_name} for {model_name}...")
+        logger.info(
+            f"Evaluating {metric_name} for {model_name} on {dataset} dataset..."
+        )
         subprocess.run(command)
-        logger.info(f"{metric_name} evaluation for {model_name} completed.")
+        logger.info(
+            f"{metric_name} evaluation for {model_name} on {dataset} dataset completed."
+        )
+
+        if not os.path.exists(output_path):
+            logger.warning(f"Evaluation result for {metric_name} not found. Skipping.")
+            return
 
         with open(output_path, "r") as f:
             metric_results = json.load(f)
-            results[metric_name] = metric_results
+            results[dataset][metric_name] = metric_results
 
         # Save results after each metric evaluation
         save_results()
@@ -133,38 +143,46 @@ def evaluate_model_results(
 
     # Evaluate using evaluate-v2.0.py
     if "evaluate-v2" in metrics:
+        output_path = os.path.join(
+            eval_results_dir,
+            model_type,
+            f"{model_name}_{dataset}_evaluate-v2_results.json",
+        )
         command = [
             "python",
             eval_script,
-            dataset,
+            dataset_file_path,
             predictions_path,
             "--out-file",
-            eval_output_path,
+            output_path,
             "--na-prob-thresh",
             "0.5",
         ]
-        logger.info(f"Evaluating evaluate-v2 for {model_name}...")
+        logger.info(f"Evaluating evaluate-v2 for {model_name} on {dataset} dataset...")
         subprocess.run(command)
-        logger.info(f"Evaluate-v2 evaluation for {model_name} completed.")
+        logger.info(
+            f"Evaluate-v2 evaluation for {model_name} on {dataset} dataset completed."
+        )
 
-        with open(eval_output_path, "r") as f:
-            eval_results = json.load(f)
-            results["evaluate-v2"] = eval_results
+        if os.path.exists(output_path):
+            with open(output_path, "r") as f:
+                eval_results = json.load(f)
+                results[dataset]["evaluate-v2"] = eval_results
 
-        save_results()
+            save_results()
 
     # Evaluate BLEU
     if "bleu" in metrics:
-        evaluate_metric(bleu_script, "bleu", "bleu")
+        evaluate_metric(bleu_script, "bleu")
 
     # Evaluate ROUGE
     if "rouge" in metrics:
-        evaluate_metric(rouge_script, "rouge", "rouge")
+        evaluate_metric(rouge_script, "rouge")
 
     # Evaluate BERTScore
     if "bertscore" in metrics:
-        extra_args = ["-G"] if isGermanQuAD else None
-        evaluate_metric(bertscore_script, "bertscore", "bertscore", extra_args)
+        extra_args = ["-G"] if dataset == "G" else None
+        evaluate_metric(bertscore_script, "bertscore", extra_args)
 
     # Save combined results at the end just in case
     save_results()
@@ -281,7 +299,7 @@ def answer_question_with_sliding_window(
 
 
 def generate_answers_with_sliding_window(
-    model_name, input_path, output_path, use_token_type_ids=True
+    model_name, input_path, output_path, use_token_type_ids=True, max_length=512
 ):
     tokenizer, model, device = load_model_and_tokenizer(model_name)
     dataset_data = load_dataset(input_path)
@@ -295,7 +313,13 @@ def generate_answers_with_sliding_window(
                 question = qa["question"]
                 id_ = qa["id"]
                 answer = answer_question_with_sliding_window(
-                    tokenizer, model, device, question, context, use_token_type_ids
+                    tokenizer,
+                    model,
+                    device,
+                    question,
+                    context,
+                    use_token_type_ids,
+                    max_length,
                 )
                 results.append({"id": id_, "answer": answer})
 

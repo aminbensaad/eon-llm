@@ -46,12 +46,12 @@ model_IDs = {
         # "TheBloke/DiscoLM_German_7b_v1-GGUF",
     ],
     "tuned": [  # General models (fine-tuned on SQuAD)
-        "google-bert/bert-large-cased-whole-word-masking-finetuned-squad",  # ✅
+        # "google-bert/bert-large-cased-whole-word-masking-finetuned-squad",  # ✅
         "distilbert/distilbert-base-cased-distilled-squad",  # ✅
-        "timpal0l/mdeberta-v3-base-squad2",  # ✅
-        "deepset/roberta-base-squad2",  # ✅
-        "deepset/roberta-large-squad2",  # ✅
-        "deepset/xlm-roberta-base-squad2",
+        # "timpal0l/mdeberta-v3-base-squad2",  # ✅
+        # "deepset/roberta-base-squad2",  # ✅
+        # "deepset/roberta-large-squad2",  # ✅
+        # "deepset/xlm-roberta-base-squad2",
     ],
     "Gtuned": [  # German models (fine-tuned on GermanQuAD)
         "deutsche-telekom/bert-multi-english-german-squad2",  # ✅
@@ -97,20 +97,20 @@ def print_usage():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run predictions and/or evaluations.")
     parser.add_argument(
-        "-d",
-        "--datasets",
-        type=str,
-        nargs="+",
-        choices=["SQuAD", "G"],
-        help="Specify the datasets to use (SQuAD, G).",
-    )
-    parser.add_argument(
         "-m",
         "--model_types",
         type=str,
         nargs="+",
         choices=["base", "Gbase", "tuned", "Gtuned"],
         help="Specify the model types to run.",
+    )
+    parser.add_argument(
+        "-d",
+        "--datasets",
+        type=str,
+        nargs="+",
+        choices=["SQuAD", "G"],
+        help="Specify the datasets to use (SQuAD, G).",
     )
     parser.add_argument(
         "-p", "--predictions", action="store_true", help="Run predictions."
@@ -157,7 +157,6 @@ if __name__ == "__main__":
         suffix = "_G" if dataset_key == "G" else ""
 
         for model_type in args.model_types:
-            logger.info(f"Running {model_type} models with {dataset} dataset.")
             models = model_IDs[model_type]
 
             # Run predictions if specified
@@ -189,29 +188,38 @@ if __name__ == "__main__":
 
             # Run evaluations if specified
             if args.evaluations or args.bleu or args.rouge or args.bertscore:
-                for model_ID in models:
-                    model_name = model_ID.split("/")[1]
-                    try:
-                        predictions_path = os.path.join(
-                            model_results_dir,
-                            model_type,
-                            f"{model_name}{suffix}_predictions.json",
-                        )
-                        eval_output_path = os.path.join(
-                            eval_results_dir,
-                            model_type,
-                            f"{model_name}{suffix}_eval_results.json",
-                        )
-                        test_data_path = input_path
-                        utils.evaluate_model_results(
-                            metrics_dir,
-                            eval_results_dir,
-                            predictions_path,
-                            eval_output_path,
-                            model_name,
-                            model_type,
-                            test_data_path,
-                            metrics_to_run,
-                        )
-                    except Exception as e:
-                        logger.warning(f"Failed to evaluate model {model_name}: {e}")
+                for model_type in args.model_types:
+                    for dataset_key in args.datasets:
+                        dataset = dataset_key
+                        input_path = datasets[dataset_key]
+                        suffix = "_G" if dataset_key == "G" else ""
+                        models = model_IDs[model_type]
+
+                        for model_ID in models:
+                            model_name = model_ID.split("/")[1]
+                            try:
+                                predictions_path = os.path.join(
+                                    model_results_dir,
+                                    model_type,
+                                    f"{model_name}{suffix}_predictions.json",
+                                )
+                                eval_output_path = os.path.join(
+                                    eval_results_dir,
+                                    model_type,
+                                    f"{model_name}_eval_results.json",
+                                )
+                                utils.evaluate_model_results(
+                                    metrics_dir,
+                                    eval_results_dir,
+                                    predictions_path,
+                                    eval_output_path,
+                                    model_name,
+                                    model_type,
+                                    dataset,
+                                    input_path,
+                                    metrics_to_run,
+                                )
+                            except Exception as e:
+                                logger.warning(
+                                    f"Failed to evaluate model {model_name}: {e}"
+                                )
