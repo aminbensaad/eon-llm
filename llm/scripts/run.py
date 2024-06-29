@@ -61,6 +61,15 @@ model_IDs = {
     ],
 }
 
+
+def model_name_from_id(model_id: str):
+    model_id_components = model_id.split("/")
+    if len(model_id_components) > 2:
+        return model_id_components[-2]
+    else:
+        return model_id_components[-1]
+
+
 # Define dataset paths
 datasets = {
     "SQuAD": os.path.join(data_dir, "SQuAD/dev-v2.0.json"),
