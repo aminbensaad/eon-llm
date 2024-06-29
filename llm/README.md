@@ -31,7 +31,7 @@ Run model predictions (`-p`) or (re-)run evaluation metrics (`-e`) for testing, 
 
 ```sh
 python scripts/run.py tuned -p
-python scripts/run.py tuned -e --all
+python run.py -d SQuAD G -m tuned Gtuned -p -e --all
 ```
 
 # Project Structure 🗂️
