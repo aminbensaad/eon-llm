@@ -20,10 +20,8 @@ Dependencies:
     rouge-score (for ROUGE score computation)
 """
 
-import os
 import json
 import sys
-import subprocess
 
 # Ensure required packages are installed
 # subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
@@ -66,36 +64,61 @@ def main(predictions_path, dataset_path, output_path):
     with open(dataset_path, "r") as f:
         dataset = json.load(f)
 
-    # Compute ROUGE scores for each question-answer pair
+    # Initialize scores
     all_scores = []
+    has_ans_scores = []
+    no_ans_scores = []
+
+    # Compute ROUGE scores for each question-answer pair
     for article in dataset["data"]:
         for paragraph in article["paragraphs"]:
             for qa in paragraph["qas"]:
-                qid = qa["id"]
+                qid = str(qa["id"])
                 reference = qa["answers"][0]["text"] if qa["answers"] else ""
                 hypothesis = predictions.get(qid, "")
                 scores = compute_rouge(reference, hypothesis)
                 all_scores.append(scores)
 
-    # Compute average ROUGE scores
-    avg_rouge = {
-        "rouge1": {"f": 0, "p": 0, "r": 0},
-        "rouge2": {"f": 0, "p": 0, "r": 0},
-        "rougeL": {"f": 0, "p": 0, "r": 0},
-    }
-    for scores in all_scores:
-        for key in scores:
-            avg_rouge[key]["f"] += scores[key].fmeasure
-            avg_rouge[key]["p"] += scores[key].precision
-            avg_rouge[key]["r"] += scores[key].recall
+                if qa["is_impossible"]:
+                    no_ans_scores.append(scores)
+                else:
+                    has_ans_scores.append(scores)
 
-    for key in avg_rouge:
-        for sub_key in avg_rouge[key]:
-            avg_rouge[key][sub_key] /= len(all_scores)
+    # Function to average ROUGE scores
+    def average_rouge_scores(scores_list):
+        avg_rouge = {
+            "rouge1": {"f": 0, "p": 0, "r": 0},
+            "rouge2": {"f": 0, "p": 0, "r": 0},
+            "rougeL": {"f": 0, "p": 0, "r": 0},
+        }
+        for scores in scores_list:
+            for key in scores:
+                avg_rouge[key]["f"] += scores[key].fmeasure
+                avg_rouge[key]["p"] += scores[key].precision
+                avg_rouge[key]["r"] += scores[key].recall
+
+        for key in avg_rouge:
+            for sub_key in avg_rouge[key]:
+                avg_rouge[key][sub_key] /= len(scores_list) if scores_list else 1
+
+        return avg_rouge
+
+    # Compute average ROUGE scores
+    avg_rouge = average_rouge_scores(all_scores)
+    has_ans_rouge = average_rouge_scores(has_ans_scores)
+    no_ans_rouge = average_rouge_scores(no_ans_scores)
 
     # Save the average ROUGE scores to the output file
     with open(output_path, "w") as f:
-        json.dump(avg_rouge, f, indent=2)
+        json.dump(
+            {
+                "rouge": avg_rouge,
+                "HasAns_rouge": has_ans_rouge,
+                "NoAns_rouge": no_ans_rouge,
+            },
+            f,
+            indent=2,
+        )
 
 
 if __name__ == "__main__":

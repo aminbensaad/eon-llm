@@ -18,10 +18,8 @@ Dependencies:
     bert-score (for BERTScore computation)
 """
 
-import os
 import json
 import sys
-import subprocess
 
 # Ensure required packages are installed
 # subprocess.check_call([sys.executable, "-m", "pip", "install", "bert-score"])
@@ -37,22 +35,45 @@ def load_data(predictions_file, references_file):
 
     references = []
     candidates = []
+    has_ans_references = []
+    has_ans_candidates = []
+    no_ans_references = []
+    no_ans_candidates = []
 
     for article in references_data["data"]:
         for paragraph in article["paragraphs"]:
             for qa in paragraph["qas"]:
-                qid = qa["id"]
-                if isinstance(predictions, dict) and qid in predictions:
+                qid = str(qa["id"])
+                if qid in predictions:
                     candidate_answer = predictions[qid]
-                    references.append(qa["answers"][0]["text"] if qa["answers"] else "")
+                    reference_answer = qa["answers"][0]["text"] if qa["answers"] else ""
+                    references.append(reference_answer)
                     candidates.append(candidate_answer)
-                elif isinstance(predictions, list) and qid in predictions:
-                    references.append(qa["answers"][0]["text"] if qa["answers"] else "")
-                    candidates.append(
-                        qa["answers"][0]["text"]
-                    )  # Use the reference as the prediction
 
-    return candidates, references
+                    if qa["is_impossible"]:
+                        no_ans_references.append(reference_answer)
+                        no_ans_candidates.append(candidate_answer)
+                    else:
+                        has_ans_references.append(reference_answer)
+                        has_ans_candidates.append(candidate_answer)
+                else:
+                    references.append("")
+                    candidates.append("")
+                    if qa["is_impossible"]:
+                        no_ans_references.append("")
+                        no_ans_candidates.append("")
+                    else:
+                        has_ans_references.append("")
+                        has_ans_candidates.append("")
+
+    return (
+        candidates,
+        references,
+        has_ans_candidates,
+        has_ans_references,
+        no_ans_candidates,
+        no_ans_references,
+    )
 
 
 def calculate_bertscore(candidates, references, lang):
@@ -65,17 +86,37 @@ def calculate_bertscore(candidates, references, lang):
 
 
 def main(predictions_path, dataset_path, output_path, lang):
-    candidates, references = load_data(predictions_path, dataset_path)
+    (
+        candidates,
+        references,
+        has_ans_candidates,
+        has_ans_references,
+        no_ans_candidates,
+        no_ans_references,
+    ) = load_data(predictions_path, dataset_path)
+
     bertscore_results = calculate_bertscore(candidates, references, lang)
+    has_ans_bertscore_results = calculate_bertscore(
+        has_ans_candidates, has_ans_references, lang
+    )
+    no_ans_bertscore_results = calculate_bertscore(
+        no_ans_candidates, no_ans_references, lang
+    )
+
+    results = {
+        "BERTScore": bertscore_results,
+        "HasAns_BERTScore": has_ans_bertscore_results,
+        "NoAns_BERTScore": no_ans_bertscore_results,
+    }
 
     with open(output_path, "w") as f:
-        json.dump(bertscore_results, f, indent=4)
+        json.dump(results, f, indent=4)
 
     print(f"BERTScore results saved to {output_path}")
 
 
 if __name__ == "__main__":
-    # Check for the optional -G flag
+    # Check for the optional -G flag to process GermanQuAD
     is_german = "-G" in sys.argv
     if is_german:
         sys.argv.remove("-G")
