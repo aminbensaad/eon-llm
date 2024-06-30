@@ -1,0 +1,42 @@
+{
+    "distilbert-base-cased-distilled-squad": {
+        "SQuAD": 1097.9897339344025,
+        "G": 571.1615948677063
+    },
+    "bert-large-cased-whole-word-masking-finetuned-squad": {
+        "SQuAD": 6126.959834814072,
+        "G": 2727.079379081726
+    },
+    "mdeberta-v3-base-squad2": {
+        "SQuAD": 2668.050201177597,
+        "G": 1531.777811050415
+    },
+    "roberta-base-squad2": {
+        "SQuAD": 1034.9220089912415,
+        "G": 1326.8403210639954
+    },
+    "roberta-large-squad2": {
+        "SQuAD": 3328.6749398708344,
+        "G": 3687.508332014084
+    },
+    "xlm-roberta-base-squad2": {
+        "SQuAD": 1133.311380147934,
+        "G": 832.6331882476807
+    },
+    "bert-multi-english-german-squad2": {
+        "SQuAD": 2123.7599427700043,
+        "G": 631.9064998626709
+    },
+    "gelectra-base-germanquad-distilled": {
+        "SQuAD": 2025.9874761104584,
+        "G": 658.8948249816895
+    },
+    "gelectra-base-germanquad": {
+        "SQuAD": 2068.798446893692,
+        "G": 677.3300433158875
+    },
+    "gelectra-large-germanquad": {
+        "SQuAD": 6049.489627122879,
+        "G": 2034.532322883606
+    }
+}

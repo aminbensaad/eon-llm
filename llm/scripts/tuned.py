@@ -107,6 +107,8 @@ def main(model_name, input_path, output_path):
                 id_ = qa["id"]
                 answer = answer_question_with_sliding_window(question, context)
                 results.append({"id": id_, "answer": answer})
+        with open(output_path, "w") as f:
+            json.dump({item["id"]: item["answer"] for item in results}, f)
 
     logger.info(f"Saving the generated answers to {output_path}...")
     # Save the results
