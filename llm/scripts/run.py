@@ -140,7 +140,7 @@ if __name__ == "__main__":
 
     metrics_to_run = []
     if args.all:
-        metrics_to_run = ["evaluate-v2", "bleu", "rouge", "bertscore"]
+        metrics_to_run = ["evaluate-v2", "bleu", "rouge", "bertscore", "overall"]
     else:
         if args.evaluations:
             metrics_to_run.append("evaluate-v2")

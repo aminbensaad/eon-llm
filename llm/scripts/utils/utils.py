@@ -187,6 +187,18 @@ def evaluate_model_results(
         extra_args = ["-G"] if dataset == "G" else None
         evaluate_metric(bertscore_script, bertscore, extra_args)
 
+    overall = "overall"
+    if overall in metrics:
+        exact_score = results[dataset]["evaluate-v2"]["exact"]
+        f1_score = results[dataset]["evaluate-v2"]["f1"]
+        bleu_score = results[dataset]["bleu"]["bleu"]
+        rouge_score = results[dataset]["rouge"]["rouge"]["rougeL"]["f"]
+        bertscore_score = results[dataset]["bertscore"]["BERTScore"]["F1"]
+
+        evalv2_score = (exact_score + f1_score) / 2.0
+        bbr = (bertscore_score + bleu_score + rouge_score) / 3.0
+        results[dataset][overall] = (evalv2_score + bbr) / 2.0
+
     # Save combined results at the end just in case
     save_results()
 
