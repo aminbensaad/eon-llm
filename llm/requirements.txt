@@ -58,7 +58,7 @@ multidict==6.0.5
 multiprocess==0.70.16
 nest-asyncio==1.6.0
 networkx==3.3
-nltk==3.8.1
+nltk @ git+https://github.com/nltk/nltk@8c233dc585b91c7a0c58f96a9d99244a379740d5
 numpy==1.26.4
 packaging==24.0
 pandas==2.2.2
