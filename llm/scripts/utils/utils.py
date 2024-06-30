@@ -137,7 +137,6 @@ def evaluate_model_results(
 
         # Save results after each metric evaluation
         save_results()
-
         # Remove temporary results file
         os.remove(output_path)
 
@@ -170,19 +169,23 @@ def evaluate_model_results(
                 results[dataset]["evaluate-v2"] = eval_results
 
             save_results()
+            os.remove(output_path)
 
     # Evaluate BLEU
-    if "bleu" in metrics:
-        evaluate_metric(bleu_script, "bleu")
+    bleu = "bleu"
+    if bleu in metrics:
+        evaluate_metric(bleu_script, bleu)
 
     # Evaluate ROUGE
-    if "rouge" in metrics:
-        evaluate_metric(rouge_script, "rouge")
+    rouge = "rouge"
+    if rouge in metrics:
+        evaluate_metric(rouge_script, rouge)
 
     # Evaluate BERTScore
-    if "bertscore" in metrics:
+    bertscore = "bertscore"
+    if bertscore in metrics:
         extra_args = ["-G"] if dataset == "G" else None
-        evaluate_metric(bertscore_script, "bertscore", extra_args)
+        evaluate_metric(bertscore_script, bertscore, extra_args)
 
     # Save combined results at the end just in case
     save_results()
