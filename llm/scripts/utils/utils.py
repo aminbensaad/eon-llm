@@ -137,7 +137,6 @@ def evaluate_model_results(
 
         # Save results after each metric evaluation
         save_results()
-
         # Remove temporary results file
         os.remove(output_path)
 
@@ -170,19 +169,35 @@ def evaluate_model_results(
                 results[dataset]["evaluate-v2"] = eval_results
 
             save_results()
+            os.remove(output_path)
 
     # Evaluate BLEU
-    if "bleu" in metrics:
-        evaluate_metric(bleu_script, "bleu")
+    bleu = "bleu"
+    if bleu in metrics:
+        evaluate_metric(bleu_script, bleu)
 
     # Evaluate ROUGE
-    if "rouge" in metrics:
-        evaluate_metric(rouge_script, "rouge")
+    rouge = "rouge"
+    if rouge in metrics:
+        evaluate_metric(rouge_script, rouge)
 
     # Evaluate BERTScore
-    if "bertscore" in metrics:
+    bertscore = "bertscore"
+    if bertscore in metrics:
         extra_args = ["-G"] if dataset == "G" else None
-        evaluate_metric(bertscore_script, "bertscore", extra_args)
+        evaluate_metric(bertscore_script, bertscore, extra_args)
+
+    overall = "overall"
+    if overall in metrics:
+        exact_score = results[dataset]["evaluate-v2"]["exact"]
+        f1_score = results[dataset]["evaluate-v2"]["f1"]
+        bleu_score = results[dataset]["bleu"]["bleu"]
+        rouge_score = results[dataset]["rouge"]["rouge"]["rougeL"]["f"]
+        bertscore_score = results[dataset]["bertscore"]["BERTScore"]["F1"]
+
+        evalv2_score = (exact_score + f1_score) / 2.0
+        bbr = (bertscore_score + bleu_score + rouge_score) / 3.0
+        results[dataset][overall] = (evalv2_score + bbr) / 2.0
 
     # Save combined results at the end just in case
     save_results()
@@ -348,3 +363,45 @@ def generate_answers_with_pipeline(model_name, input_path, output_path):
                 results.append({"id": id_, "answer": answer})
 
     save_results(output_path, results)
+
+
+def validate_predictions(predictions_path, dataset_path):
+    with open(predictions_path, "r", encoding="utf-8") as f:
+        predictions = json.load(f)
+
+    with open(dataset_path, "r", encoding="utf-8") as f:
+        dataset_json = json.load(f)
+        dataset = dataset_json["data"]
+
+    # Initialize sets to collect IDs
+    dataset_ids = set()
+    pred_ids = set(predictions.keys())
+
+    # Collect all IDs from the dataset
+    for article in dataset:
+        for paragraph in article["paragraphs"]:
+            for qa in paragraph["qas"]:
+                qid = str(qa["id"])
+                dataset_ids.add(qid)
+
+    # Find missing IDs
+    missing_from_preds = dataset_ids - pred_ids
+    missing_from_dataset = pred_ids - dataset_ids
+
+    print(f"Total IDs in dataset: {len(dataset_ids)}")
+    print(f"Total IDs in predictions: {len(pred_ids)}")
+    print(f"Missing IDs in predictions: {len(missing_from_preds)}")
+    print(f"Missing IDs in dataset: {len(missing_from_dataset)}")
+
+    if missing_from_preds:
+        print(f"Missing from predictions: {missing_from_preds}")
+    if missing_from_dataset:
+        print(f"Missing from dataset: {missing_from_dataset}")
+
+    # Check prediction format
+    for qid, answer in predictions.items():
+        if not isinstance(qid, str) or not isinstance(answer, str):
+            print(f"Invalid prediction format for ID: {qid}, Answer: {answer}")
+            return False
+
+    return True

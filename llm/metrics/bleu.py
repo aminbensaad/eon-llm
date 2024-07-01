@@ -20,11 +20,9 @@ Dependencies:
 """
 
 import sys
-import subprocess
 
 # subprocess.check_call([sys.executable, "-m", "pip", "install", "nltk"])
 
-import os
 import json
 
 # Ensure required packages are installed
@@ -64,23 +62,38 @@ def main(predictions_path, dataset_path, output_path):
     with open(dataset_path, "r") as f:
         dataset = json.load(f)
 
+    # Initialize scores
+    overall_scores = []
+    has_ans_scores = []
+    no_ans_scores = []
+
     # Compute BLEU scores for each question-answer pair
-    scores = []
     for article in dataset["data"]:
         for paragraph in article["paragraphs"]:
             for qa in paragraph["qas"]:
-                qid = qa["id"]
+                qid = str(qa["id"])
                 reference = qa["answers"][0]["text"] if qa["answers"] else ""
                 hypothesis = predictions.get(qid, "")
                 score = compute_bleu(reference, hypothesis)
-                scores.append(score)
+                overall_scores.append(score)
 
-    # Compute average BLEU score
-    avg_bleu = sum(scores) / len(scores)
+                if qa["is_impossible"]:
+                    no_ans_scores.append(score)
+                else:
+                    has_ans_scores.append(score)
 
-    # Save the average BLEU score to the output file
+    # Compute average BLEU scores
+    avg_bleu = sum(overall_scores) / len(overall_scores) if overall_scores else 0.0
+    has_ans_bleu = sum(has_ans_scores) / len(has_ans_scores) if has_ans_scores else 0.0
+    no_ans_bleu = sum(no_ans_scores) / len(no_ans_scores) if no_ans_scores else 0.0
+
+    # Save the average BLEU scores to the output file
     with open(output_path, "w") as f:
-        json.dump({"bleu": avg_bleu}, f, indent=2)
+        json.dump(
+            {"bleu": avg_bleu, "HasAns_bleu": has_ans_bleu, "NoAns_bleu": no_ans_bleu},
+            f,
+            indent=2,
+        )
 
 
 if __name__ == "__main__":
