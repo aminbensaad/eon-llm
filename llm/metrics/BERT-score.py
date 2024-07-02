@@ -77,6 +77,14 @@ def load_data(predictions_file, references_file):
 
 
 def calculate_bertscore(candidates, references, lang):
+    if not candidates or not references:
+        print("Error: Candidates or references list is empty.")
+        return {"Precision": 0.0, "Recall": 0.0, "F1": 0.0}
+
+    # Debug: print the first few candidates and references
+    print("First few candidates:", candidates[:5])
+    print("First few references:", references[:5])
+
     P, R, F1 = score(candidates, references, lang=lang, verbose=True)
     return {
         "Precision": P.mean().item(),
