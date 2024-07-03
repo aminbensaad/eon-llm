@@ -9,65 +9,23 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from scripts.utils import utils
+from scripts.model_ids import (
+    base_path,
+    model_script_path,
+    model_IDs,
+    model_name_from_id,
+)
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Define paths
-base = ".."
-data_dir = os.path.join(base, "data")
-model_results_dir = os.path.join(base, "model_results")
-eval_results_dir = os.path.join(base, "eval_results")
-metrics_dir = os.path.join(base, "metrics")
-model_dir = os.path.join(base, "models")
-timing_results_path = os.path.join(base, "timing_results.json")
-
-# Define models to run
-model_IDs = {
-    "base": [  # German base models (pre-trained)
-        #"TheBloke/mistral-ft-optimized-1227-GGUF",
-         "tiiuae/falcon-7b-instruct", # ✅
-        # "gradientai/Llama-3-8B-Instruct-Gradient-1048k"
-         "nvidia/Llama3-ChatQA-1.5-8B",  # ✅
-        # "mistralai/Mistral-7B-Instruct-v0.1",
-        # "meta-llama/Meta-Llama-3-8B-Instruct",
-        # "mistralai/Mixtral-8x7B-Instruct-v0.1",  # PENDING access
-        # "Deci/DeciLM-7B-instruct",
-        # HuggingFace Leaderboard
-        # "BarraHome/Mistroll-7B-v2.2",
-        # "yam-peleg/Experiment26-7B",
-        # "MTSAIR/multi_verse_model",
-    ],
-    "Gbase": [  # German base models (pre-trained)
-        # "philschmid/instruct-igel-001",
-        # "TheBloke/em_german_leo_mistral-GGUF",
-        "VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct",
-        # "TheBloke/DiscoLM_German_7b_v1-GGUF",
-    ],
-    "tuned": [  # General models (fine-tuned on SQuAD)
-         "google-bert/bert-large-cased-whole-word-masking-finetuned-squad",  # ✅
-        "distilbert/distilbert-base-cased-distilled-squad",  # ✅
-         "timpal0l/mdeberta-v3-base-squad2",  # ✅
-         "deepset/roberta-base-squad2",  # ✅
-         "deepset/roberta-large-squad2",  # ✅
-         #"deepset/xlm-roberta-base-squad2",
-    ],
-    "Gtuned": [  # German models (fine-tuned on GermanQuAD)
-        "deutsche-telekom/bert-multi-english-german-squad2",  # ✅
-        "deepset/gelectra-base-germanquad-distilled",
-        "deepset/gelectra-base-germanquad",  # ✅
-        "deepset/gelectra-large-germanquad",  # ✅
-    ],
-}
-
-
-def model_name_from_id(model_id: str):
-    model_id_components = model_id.split("/")
-    if len(model_id_components) > 2:
-        return model_id_components[-2]
-    else:
-        return model_id_components[-1]
+data_dir = os.path.join(base_path, "data")
+model_results_dir = os.path.join(base_path, "model_results")
+eval_results_dir = os.path.join(base_path, "eval_results")
+metrics_dir = os.path.join(base_path, "metrics")
+timing_results_path = os.path.join(base_path, "timing_results.json")
 
 
 # Define dataset paths
@@ -163,14 +121,14 @@ if __name__ == "__main__":
             # Run predictions if specified
             if args.predictions:
                 for model_ID in models:
-                    model_name = model_ID.split("/")[1]
+                    model_name = model_name_from_id(model_ID)
                     output_file_name = f"{model_name}{suffix}_predictions.json"
                     output_path = os.path.join(
                         model_results_dir, model_type, output_file_name
                     )
                     print(f"Output path is {output_path}")
                     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-                    script = os.path.join(model_dir, model_type, f"{model_name}.py")
+                    script = model_script_path(model_type, model_ID)
 
                     logger.info("Checking disk space...")
                     utils.check_disk_space()
@@ -198,7 +156,7 @@ if __name__ == "__main__":
                         models = model_IDs[model_type]
 
                         for model_ID in models:
-                            model_name = model_ID.split("/")[1]
+                            model_name = model_name_from_id(model_ID)
                             try:
                                 predictions_path = os.path.join(
                                     model_results_dir,
