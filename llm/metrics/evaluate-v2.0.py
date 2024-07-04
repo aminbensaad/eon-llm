@@ -1,41 +1,5 @@
-"""
-Official evaluation script for SQuAD version 2.0.
-
-In addition to basic functionality, we also compute additional statistics and
-plot precision-recall curves if an additional na_prob.json file is provided.
-This file is expected to map question ID's to the model's predicted probability
-that a question is unanswerable.
-
-Example Call:
-    python evaluate-v2.0.py data.json pred.json -o eval.json -n na_prob.json -t 0.5 -p out_images
-
-    Inputs:
-        data.json: The SQuAD dataset in JSON format.
-        pred.json: Model predictions in JSON format.
-        na_prob.json: Model estimates of the probability that a question is unanswerable in JSON format (optional).
-        eval.json: File to write the evaluation metrics to (optional).
-        out_images: Directory to save precision-recall curve images (optional).
-
-    Outputs:
-        eval.json: A JSON file containing evaluation metrics such as exact match and F1 scores.
-        out_images: Directory containing precision-recall curve images (if specified).
-        
-    Algorithm Overview:
-    1. Parse command-line arguments with `parse_args()`.
-    2. Load the SQuAD dataset and model predictions from JSON files.
-    3. Prepare data with `make_qid_to_has_ans()` and compute raw scores using `get_raw_scores()`.
-    4. Apply no-answer threshold with `apply_no_ans_threshold()`.
-    5. Compute evaluation metrics with `make_eval_dict()` and `merge_eval()`.
-    6. If applicable, perform precision-recall analysis and plot histograms with `run_precision_recall_analysis()` and `histogram_na_prob()`.
-    7. Determine best thresholds using `find_all_best_thresh()`.
-    8. Output results to a file or print to console.
-"""
-
 import sys
 import subprocess
-
-# subprocess.check_call([sys.executable, "-m", "pip", "install", "numpy", "matplotlib"])
-
 import argparse
 import collections
 import json
@@ -91,7 +55,7 @@ def make_qid_to_has_ans(dataset):
     for article in dataset:
         for p in article["paragraphs"]:
             for qa in p["qas"]:
-                qid_to_has_ans[qa["id"]] = bool(qa["answers"])
+                qid_to_has_ans[str(qa["id"])] = bool(qa["answers"])
     return qid_to_has_ans
 
 
@@ -147,7 +111,7 @@ def get_raw_scores(dataset, preds):
     for article in dataset:
         for p in article["paragraphs"]:
             for qa in p["qas"]:
-                qid = qa["id"]
+                qid = str(qa["id"])  # Convert to string
                 gold_answers = [
                     a["text"] for a in qa["answers"] if normalize_answer(a["text"])
                 ]
@@ -167,6 +131,7 @@ def get_raw_scores(dataset, preds):
 def apply_no_ans_threshold(scores, na_probs, qid_to_has_ans, na_prob_thresh):
     new_scores = {}
     for qid, s in scores.items():
+        qid = str(qid)
         pred_na = na_probs[qid] > na_prob_thresh
         if pred_na:
             new_scores[qid] = float(not qid_to_has_ans[qid])
@@ -189,8 +154,8 @@ def make_eval_dict(exact_scores, f1_scores, qid_list=None):
         total = len(qid_list)
         return collections.OrderedDict(
             [
-                ("exact", 100.0 * sum(exact_scores[k] for k in qid_list) / total),
-                ("f1", 100.0 * sum(f1_scores[k] for k in qid_list) / total),
+                ("exact", 100.0 * sum(exact_scores[str(k)] for k in qid_list) / total),
+                ("f1", 100.0 * sum(f1_scores[str(k)] for k in qid_list) / total),
                 ("total", total),
             ]
         )
@@ -324,11 +289,23 @@ def find_all_best_thresh(main_eval, preds, exact_raw, f1_raw, na_probs, qid_to_h
 
 
 def main():
-    with open(OPTS.data_file) as f:
+    print("Test Data:", OPTS.data_file)
+    print("Predictions:", OPTS.pred_file)
+    with open(OPTS.data_file, "r", encoding="utf-8") as f:
         dataset_json = json.load(f)
         dataset = dataset_json["data"]
-    with open(OPTS.pred_file) as f:
+    with open(OPTS.pred_file, "r", encoding="utf-8") as f:
         preds = json.load(f)
+
+    # Debug: print the first few predictions
+    print("First few predictions:", list(preds.items())[:5])
+
+    # Verify predictions
+    missing_qids = verify_predictions(dataset, preds)
+    if missing_qids:
+        print(f"Missing predictions for the following question IDs: {missing_qids}")
+        sys.exit(1)
+
     if OPTS.na_prob_file:
         with open(OPTS.na_prob_file) as f:
             na_probs = json.load(f)
@@ -366,6 +343,29 @@ def main():
             json.dump(out_eval, f)
     else:
         print(json.dumps(out_eval, indent=2))
+
+
+def verify_predictions(dataset, preds):
+    """
+    Verify that all questions in the dataset have corresponding predictions.
+
+    Args:
+        dataset (list): The dataset loaded from the data file.
+        preds (dict): The predictions loaded from the predictions file.
+
+    Returns:
+        list: A list of question IDs that are missing predictions.
+    """
+    missing_qids = []
+    for article in dataset:
+        for p in article["paragraphs"]:
+            for qa in p["qas"]:
+                qid = str(qa["id"])
+                if qid not in preds:
+                    missing_qids.append(qid)
+
+    print(f"Missing predictions: {len(missing_qids)}")
+    return missing_qids
 
 
 if __name__ == "__main__":
