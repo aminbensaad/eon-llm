@@ -26,10 +26,10 @@ timing_results_path = os.path.join(base, "timing_results.json")
 # Define models to run
 model_IDs = {
     "base": [  # German base models (pre-trained)
-        "TheBloke/mistral-ft-optimized-1227-GGUF",
-        # "tiiuae/falcon-7b-instruct", # ✅
+        #"TheBloke/mistral-ft-optimized-1227-GGUF",
+         "tiiuae/falcon-7b-instruct", # ✅
         # "gradientai/Llama-3-8B-Instruct-Gradient-1048k"
-        # "nvidia/Llama3-ChatQA-1.5-8B",  # ✅
+         "nvidia/Llama3-ChatQA-1.5-8B",  # ✅
         # "mistralai/Mistral-7B-Instruct-v0.1",
         # "meta-llama/Meta-Llama-3-8B-Instruct",
         # "mistralai/Mixtral-8x7B-Instruct-v0.1",  # PENDING access
@@ -46,12 +46,12 @@ model_IDs = {
         # "TheBloke/DiscoLM_German_7b_v1-GGUF",
     ],
     "tuned": [  # General models (fine-tuned on SQuAD)
-        # "google-bert/bert-large-cased-whole-word-masking-finetuned-squad",  # ✅
+         "google-bert/bert-large-cased-whole-word-masking-finetuned-squad",  # ✅
         "distilbert/distilbert-base-cased-distilled-squad",  # ✅
-        # "timpal0l/mdeberta-v3-base-squad2",  # ✅
-        # "deepset/roberta-base-squad2",  # ✅
-        # "deepset/roberta-large-squad2",  # ✅
-        # "deepset/xlm-roberta-base-squad2",
+         "timpal0l/mdeberta-v3-base-squad2",  # ✅
+         "deepset/roberta-base-squad2",  # ✅
+         "deepset/roberta-large-squad2",  # ✅
+         #"deepset/xlm-roberta-base-squad2",
     ],
     "Gtuned": [  # German models (fine-tuned on GermanQuAD)
         "deutsche-telekom/bert-multi-english-german-squad2",  # ✅
@@ -155,6 +155,7 @@ if __name__ == "__main__":
         dataset = dataset_key
         input_path = datasets[dataset_key]
         suffix = "_G" if dataset_key == "G" else ""
+        print(f"Input path is {input_path}")
 
         for model_type in args.model_types:
             models = model_IDs[model_type]
@@ -167,6 +168,7 @@ if __name__ == "__main__":
                     output_path = os.path.join(
                         model_results_dir, model_type, output_file_name
                     )
+                    print(f"Output path is {output_path}")
                     os.makedirs(os.path.dirname(output_path), exist_ok=True)
                     script = os.path.join(model_dir, model_type, f"{model_name}.py")
 
