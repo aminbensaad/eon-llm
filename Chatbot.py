@@ -22,6 +22,12 @@ for l, t in model_type_labels.items():
 model_list = []
 
 
+def create_initial_message():
+    st.session_state["messages"] = [
+        {"role": "assistant", "content": "How can I help you?"}
+    ]
+
+
 def load_model() -> types.ModuleType | None:
     current_model_type = model_type_labels[st.session_state["category_selection"]]
     current_model_id = st.session_state["model_selection"]
@@ -60,8 +66,23 @@ def on_category_change():
 
 
 def on_model_change():
-    global model_module
     st.session_state["model_module"] = load_model()
+    create_initial_message()
+
+
+def on_context_input_changed():
+    st.session_state["use_history"] = False
+
+
+def on_history_context_changed():
+    message_history = st.session_state.messages
+
+    context = ""
+    for msg in message_history:
+        role = msg["role"]
+        content = msg["content"]
+        context += f"{role}: {content}\n"
+    st.session_state["context_input"] = context
 
 
 with st.sidebar:
@@ -79,28 +100,27 @@ with st.sidebar:
         on_change=on_model_change,
         key="model_selection",
     )
+    st.text_area(
+        "Context", key="context_input", on_change=on_context_input_changed, height=300
+    )
+    st.checkbox(
+        "Use history as context",
+        key="use_history",
+        on_change=on_history_context_changed,
+    )
 
 
-def answer_question(question, message_history) -> str:
-    model_module = st.session_state["model_module"]
+def answer_question(question) -> str:
+    model_module = st.session_state.get("model_module", None)
     if not model_module:
         return "Please select a model"
-
-    message_context = ""
-    for msg in message_history:
-        role = msg["role"]
-        content = msg["content"]
-        message_context += f"{role}: {content}\n"
-    # overwrite context for now since I was unable to engineer a prompt which
-    # allows the model to understand the message history
-    message_context = "Anwer the following question."
 
     model_input = {
         "data": [
             {
                 "paragraphs": [
                     {
-                        "context": message_context,
+                        "context": st.session_state["context_input"],
                         "qas": [{"id": 0, "question": question}],
                     }
                 ]
@@ -132,9 +152,7 @@ with col2:
 
 st.caption("🚀 A streamlit chatbot powered by OpenAI LLM")
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [
-        {"role": "assistant", "content": "How can I help you?"}
-    ]
+    create_initial_message()
 
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
@@ -143,8 +161,7 @@ if prompt := st.chat_input():
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
 
-    message_history = st.session_state.messages
-    answer = answer_question(prompt, message_history)
+    answer = answer_question(prompt)
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("assistant").write(answer)
