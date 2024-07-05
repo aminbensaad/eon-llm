@@ -28,6 +28,23 @@ def create_initial_message():
     ]
 
 
+if not "context" in st.session_state:
+    st.session_state["context"] = "No context."
+
+
+def generate_history_context():
+    context = (
+        "This is a chat between 'user' and 'assistant' with the following messages:\n"
+    )
+    message_history = st.session_state.messages
+    print("history: ", message_history)
+    for msg in message_history:
+        role = msg["role"]
+        content = msg["content"]
+        context += f"{role}: {content}\n"
+    return context
+
+
 def load_model() -> types.ModuleType | None:
     current_model_type = model_type_labels[st.session_state["category_selection"]]
     current_model_id = st.session_state["model_selection"]
@@ -75,39 +92,10 @@ def on_context_input_changed():
 
 
 def on_history_context_changed():
-    message_history = st.session_state.messages
+    if not st.session_state["use_history"]:
+        return
 
-    context = ""
-    for msg in message_history:
-        role = msg["role"]
-        content = msg["content"]
-        context += f"{role}: {content}\n"
-    st.session_state["context_input"] = context
-
-
-with st.sidebar:
-    current_category = st.selectbox(
-        "Category",
-        models.keys(),
-        on_change=on_category_change,
-        key="category_selection",
-    )
-    model_list = models.get(str(current_category), [])
-    model_selection = st.selectbox(
-        "Model",
-        model_list,
-        index=None,
-        on_change=on_model_change,
-        key="model_selection",
-    )
-    st.text_area(
-        "Context", key="context_input", on_change=on_context_input_changed, height=300
-    )
-    st.checkbox(
-        "Use history as context",
-        key="use_history",
-        on_change=on_history_context_changed,
-    )
+    st.session_state["context"] = generate_history_context()
 
 
 def answer_question(question) -> str:
@@ -128,7 +116,7 @@ def answer_question(question) -> str:
         ]
     }
     print(model_input)
-    with tempfile.NamedTemporaryFile("w", delete=False) as tmp_file:
+    with tempfile.NamedTemporaryFile("w") as tmp_file:
         json.dump(model_input, tmp_file)
         tmp_file.flush()
         out_file = tempfile.NamedTemporaryFile()
@@ -165,3 +153,35 @@ if prompt := st.chat_input():
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("assistant").write(answer)
+    print("messages: ", st.session_state.messages)
+    print("history 2: ", generate_history_context())
+    if st.session_state["use_history"]:
+        st.session_state["context"] = generate_history_context()
+
+with st.sidebar:
+    current_category = st.selectbox(
+        "Category",
+        models.keys(),
+        on_change=on_category_change,
+        key="category_selection",
+    )
+    model_list = models.get(str(current_category), [])
+    model_selection = st.selectbox(
+        "Model",
+        model_list,
+        index=None,
+        on_change=on_model_change,
+        key="model_selection",
+    )
+    st.text_area(
+        "Context",
+        st.session_state["context"],
+        key="context_input",
+        on_change=on_context_input_changed,
+        height=300,
+    )
+    st.checkbox(
+        "Use history as context",
+        key="use_history",
+        on_change=on_history_context_changed,
+    )
