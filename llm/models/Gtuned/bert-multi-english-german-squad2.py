@@ -8,11 +8,11 @@ logger = logging.getLogger(__name__)
 
 # Ensure the script can access utils.py
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-from scripts.utils import utils
+from llm.scripts.utils import predict
 
 
 def main(model_name, input_path, output_path):
-    utils.generate_answers_with_sliding_window(
+    predict.generate_answers_with_sliding_window(
         model_name, input_path, output_path, use_token_type_ids=True
     )
 
