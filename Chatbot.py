@@ -14,6 +14,7 @@ model_type_labels = {
     "Base": "base",
     "SQuAD Tuned": "tuned",
     "GermanSQuAD Tuned": "Gtuned",
+    "Local Model": "local",
 }
 for l, t in model_type_labels.items():
     models[l] = model_ids.model_IDs[t]
@@ -30,6 +31,11 @@ def create_initial_message():
 
 if not "context" in st.session_state:
     st.session_state["context"] = "No context."
+
+
+def fix_path(path: str) -> str:
+    fixed_path = os.path.join("llm", "dummy", path)
+    return os.path.normpath(fixed_path)
 
 
 def generate_history_context():
@@ -49,8 +55,7 @@ def load_model() -> types.ModuleType | None:
     current_model_type = model_type_labels[st.session_state["category_selection"]]
     current_model_id = st.session_state["model_selection"]
     script = model_ids.model_script_path(current_model_type, current_model_id)
-    fixed_script_path = os.path.join("llm", "dummy", script)
-    fixed_script_path = os.path.normpath(fixed_script_path)
+    fixed_script_path = fix_path(script)
 
     if not os.path.exists(fixed_script_path):
         st.error(f"Unable to find model script at '{fixed_script_path}'")
@@ -120,9 +125,12 @@ def answer_question(question) -> str:
         json.dump(model_input, tmp_file)
         tmp_file.flush()
         out_file = tempfile.NamedTemporaryFile()
-        model_module.main(
-            st.session_state["model_selection"], tmp_file.name, out_file.name
-        )
+        model_id = st.session_state["model_selection"]
+        current_model_type = model_type_labels[st.session_state["category_selection"]]
+        if current_model_type == "local":
+            model_id = os.path.join(model_ids.local_model_dir, model_id)
+            model_id = fix_path(model_id)
+        model_module.main(model_id, tmp_file.name, out_file.name)
         return json.load(out_file).get("0", "Unable to generate answer")
 
 
