@@ -1,30 +1,9 @@
-# Cell 1
 import os
 import numpy as np
 import json
 import matplotlib.pyplot as plt
 import seaborn as sns
 from IPython.display import display
-
-# Manual dictionary for model names
-manual_model_name_map = {
-    # base SQuAD
-    "Llama3-ChatQA-1.5-8B": "llama3-8b\n(8B)",
-    "falcon-7b-instruct": "falcon-7b\n(7B)",
-    # tuned: SQuAD
-    "bert": "bert\n(?)",
-    "bert-large-cased-whole-word-masking-finetuned-squad": "largeBERT\n(336M)",
-    "distilbert-base-cased-distilled-squad": "distilBERT\n(65M)",
-    "mdeberta-v3-base-squad2": "mdeBERTa\n(278M)",
-    "roberta-base-squad2": "roBERTa_base\n(124M)",
-    "roberta-large-squad2": "roBERTa_large\n(354M)",
-    "xlm-roberta-base-squad2": "xlm_roBERTa_base\n(277M)",
-    # Gtuned: SQuAD
-    "bert-multi-english-german-squad2": "multilang_BERT\n(177M)",
-    "gelectra-base-germanquad-distilled": "GElectra_distil\n(109M)",
-    "gelectra-base-germanquad": "GElectra_base\n(109M)",
-    "gelectra-large-germanquad": "GElectra_large\n(335M)",
-}
 
 
 def plot_answer_length_distribution(base_dir):
@@ -55,7 +34,7 @@ def plot_answer_length_distribution(base_dir):
 
 
 # Function to plot bar chart with line graph for overall_score
-def plot_bar_chart_with_line_graph(df, dataset_name, figure_root):
+def plot_bar_chart_with_line_graph(df, dataset_name, figure_root, model_names):
     df_sorted = df[df["dataset"] == dataset_name].sort_values(by="overall_score")
     plt.figure(figsize=(23, 6))
     bar_width = 0.25
@@ -97,7 +76,7 @@ def plot_bar_chart_with_line_graph(df, dataset_name, figure_root):
     plt.title(f"Model Comparison (ascending order) - {dataset_name}")
     plt.xticks(
         index + bar_width,
-        [manual_model_name_map.get(name, name) for name in df_sorted["short_name"]],
+        [model_names.get(name, name) for name in df_sorted["short_name"]],
         rotation=0,
     )
     plt.legend()
@@ -112,7 +91,7 @@ def plot_bar_chart_with_line_graph(df, dataset_name, figure_root):
 
 
 # Function to plot Gardner Quadrants Style graph
-def plot_gardner_quadrant(df, dataset_name, figure_root):
+def plot_gardner_quadrant(df, dataset_name, figure_root, model_names):
     df_sorted = df[df["dataset"] == dataset_name].sort_values(by="overall_score")
     plt.figure(figsize=(14, 6))
     plt.scatter(
@@ -120,7 +99,7 @@ def plot_gardner_quadrant(df, dataset_name, figure_root):
     )
     for i, txt in enumerate(df_sorted["short_name"]):
         plt.annotate(
-            manual_model_name_map.get(txt, txt),
+            model_names.get(txt, txt),
             (df_sorted["eval_other"].iat[i], df_sorted["eval_v2_score_hasAns"].iat[i]),
         )
 
@@ -138,7 +117,7 @@ def plot_gardner_quadrant(df, dataset_name, figure_root):
 
 
 # Function to plot heat map
-def plot_heat_map(df, dataset_name, figure_root):
+def plot_heat_map(df, dataset_name, figure_root, model_names):
     df_sorted = df[df["dataset"] == dataset_name].sort_values(by="overall_score")
     plt.figure(figsize=(12, 8))
 
@@ -162,9 +141,7 @@ def plot_heat_map(df, dataset_name, figure_root):
         )
         for col in heat_data.columns
     ]
-    heat_data.index = [
-        manual_model_name_map.get(name, name) for name in heat_data.index
-    ]
+    heat_data.index = [model_names.get(name, name) for name in heat_data.index]
 
     # Create the heatmap
     sns.heatmap(heat_data, annot=True, cmap="Greens")
@@ -179,7 +156,7 @@ def plot_heat_map(df, dataset_name, figure_root):
 
 
 # Function to plot bar chart to compare overall exact and f1 with HasAns exact and f1
-def plot_bar_chart_comparison(df, dataset_name, figure_root):
+def plot_bar_chart_comparison(df, dataset_name, figure_root, model_names):
     df_sorted = df[df["dataset"] == dataset_name].sort_values("overall_score")
     plt.figure(figsize=(20, 6))
     bar_width = 0.2
@@ -246,7 +223,7 @@ def plot_bar_chart_comparison(df, dataset_name, figure_root):
     )
     plt.xticks(
         index + 1.5 * bar_width,
-        [manual_model_name_map.get(name, name) for name in df_sorted["short_name"]],
+        [model_names.get(name, name) for name in df_sorted["short_name"]],
         rotation=0,
     )
     plt.legend()
@@ -261,7 +238,7 @@ def plot_bar_chart_comparison(df, dataset_name, figure_root):
 
 
 # Function to plot heat map to compare overall exact and f1 with HasAns exact and f1
-def plot_comparison_heat_map(df, dataset_name, figure_root):
+def plot_comparison_heat_map(df, dataset_name, figure_root, model_names):
     df_sorted = df[df["dataset"] == dataset_name].sort_values("overall_score")
     plt.figure(figsize=(14, 8))
 
@@ -278,7 +255,7 @@ def plot_comparison_heat_map(df, dataset_name, figure_root):
 
     # Update index labels with manual model name map
     heat_data_comparison.index = [
-        manual_model_name_map.get(name, name) for name in heat_data_comparison.index
+        model_names.get(name, name) for name in heat_data_comparison.index
     ]
 
     # Create the heatmap
@@ -296,7 +273,7 @@ def plot_comparison_heat_map(df, dataset_name, figure_root):
 
 
 # Function to plot heat map for timing results
-def plot_timing_heat_map(df, figure_root):
+def plot_timing_heat_map(df, figure_root, model_names):
     # Sort the dataframe by overall_score
     df_sorted = df.sort_values("overall_score").drop_duplicates(subset=["short_name"])
 
@@ -307,9 +284,7 @@ def plot_timing_heat_map(df, figure_root):
     timing_data.columns = ["SQuAD v2.0", "GermanQuAD"]
 
     # Update index labels with manual model name map
-    timing_data.index = [
-        manual_model_name_map.get(name, name) for name in timing_data.index
-    ]
+    timing_data.index = [model_names.get(name, name) for name in timing_data.index]
 
     # Convert times to integers and round down
     timing_data = timing_data.fillna(0).astype(int)
@@ -339,7 +314,7 @@ def plot_timing_heat_map(df, figure_root):
 
 
 # Function to plot combined heat map for average values of GermanQuAD and SQuAD
-def plot_combined_heat_map(df, figure_root):
+def plot_combined_heat_map(df, figure_root, model_names):
     # Select the relevant columns for both datasets
     relevant_columns = [
         "short_name",
@@ -373,9 +348,7 @@ def plot_combined_heat_map(df, figure_root):
         )
         for col in heat_data.columns
     ]
-    heat_data.index = [
-        manual_model_name_map.get(name, name) for name in heat_data.index
-    ]
+    heat_data.index = [model_names.get(name, name) for name in heat_data.index]
 
     # Plot the combined heat map
     heat_data_sorted = heat_data.sort_values(by="OVERALL")
