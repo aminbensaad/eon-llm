@@ -53,7 +53,6 @@ def model_name_from_id(model_id: str) -> str:
 
 def model_script_path(model_type: str, model_id: str) -> str:
     model_name = model_name_from_id(model_id)
-    model_name = model_name.replace('-', '_')
     script_path = os.path.join(model_dir, model_type, f"{model_name}.py")
     if os.path.exists(script_path):
         return os.path.join(base_path, "scripts", f"{model_type}.py")
