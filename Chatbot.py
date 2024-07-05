@@ -1,8 +1,9 @@
 import importlib.util
+import importlib.machinery
 import json
 import tempfile
 import os
-import sys
+import types
 
 import streamlit as st
 
@@ -21,12 +22,7 @@ for l, t in model_type_labels.items():
 model_list = []
 
 
-model_module = importlib.import_module("llm.scripts.tuned")
-
-
-def load_model():
-    global model_module
-
+def load_model() -> types.ModuleType | None:
     current_model_type = model_type_labels[st.session_state["category_selection"]]
     current_model_id = st.session_state["model_selection"]
     script = model_ids.model_script_path(current_model_type, current_model_id)
@@ -37,18 +33,23 @@ def load_model():
         st.error(f"Unable to find model script at '{fixed_script_path}'")
         return
 
-    spec = importlib.util.spec_from_file_location(
-        current_model_id.replace("-", "_"), fixed_script_path
-    )
+    module_name = model_ids.model_name_from_id(current_model_id).replace("-", "_")
+
+    loader = importlib.machinery.SourceFileLoader(module_name, fixed_script_path)
+    spec = importlib.util.spec_from_loader(module_name, loader)
     if not spec:
         st.error(f"Unable to load model script at '{fixed_script_path}'")
-        return
+        return None
+
     model_module = importlib.util.module_from_spec(spec)
+    loader.exec_module(model_module)
+
     if not model_module:
         st.error(f"Failed to load '{current_model_id}'")
-        return
-    spec.loader.exec_module(model_module)
+        return None
     st.info(f"Successfully loaded '{current_model_id}'")
+    print(f"Successfully loaded '{current_model_id}': ", model_module)
+    return model_module
 
 
 def on_category_change():
@@ -59,7 +60,8 @@ def on_category_change():
 
 
 def on_model_change():
-    load_model()
+    global model_module
+    st.session_state["model_module"] = load_model()
 
 
 with st.sidebar:
@@ -80,6 +82,7 @@ with st.sidebar:
 
 
 def answer_question(question, message_history) -> str:
+    model_module = st.session_state["model_module"]
     if not model_module:
         return "Please select a model"
 
@@ -88,6 +91,9 @@ def answer_question(question, message_history) -> str:
         role = msg["role"]
         content = msg["content"]
         message_context += f"{role}: {content}\n"
+    # overwrite context for now since I was unable to engineer a prompt which
+    # allows the model to understand the message history
+    message_context = "Anwer the following question."
 
     model_input = {
         "data": [
@@ -109,7 +115,7 @@ def answer_question(question, message_history) -> str:
         model_module.main(
             st.session_state["model_selection"], tmp_file.name, out_file.name
         )
-        return str(json.load(out_file))
+        return json.load(out_file).get("0", "Unable to generate answer")
 
 
 col1, _, col2 = st.columns([2, 1, 15])
