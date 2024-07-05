@@ -12,6 +12,7 @@ from scripts.utils import utils
 from scripts.model_ids import (
     base_path,
     model_script_path,
+    local_model_dir,
     model_IDs,
     model_name_from_id,
 )
@@ -40,7 +41,7 @@ def print_usage():
     print("Options:")
     print("  -d, --datasets        Specify the datasets to use (SQuAD, G).")
     print(
-        "  -m, --model_types     Specify the model types to run (base, Gbase, tuned, Gtuned)."
+        "  -m, --model_types     Specify the model types to run (base, Gbase, tuned, Gtuned, local)."
     )
     print("  -p, --predictions     Run predictions.")
     print("  -e, --evaluations     Run evaluations.")
@@ -59,7 +60,7 @@ if __name__ == "__main__":
         "--model_types",
         type=str,
         nargs="+",
-        choices=["base", "Gbase", "tuned", "Gtuned"],
+        choices=["base", "Gbase", "tuned", "Gtuned", "local"],
         help="Specify the model types to run.",
     )
     parser.add_argument(
@@ -121,7 +122,7 @@ if __name__ == "__main__":
             # Run predictions if specified
             if args.predictions:
                 for model_ID in models:
-                    model_name = model_name_from_id(model_ID)
+                    model_name = model_name_from_id(model_ID, model_type)
                     output_file_name = f"{model_name}{suffix}_predictions.json"
                     output_path = os.path.join(
                         model_results_dir, model_type, output_file_name
@@ -129,6 +130,9 @@ if __name__ == "__main__":
                     print(f"Output path is {output_path}")
                     os.makedirs(os.path.dirname(output_path), exist_ok=True)
                     script = model_script_path(model_type, model_ID)
+
+                    if model_type == "local":
+                        model_ID = os.path.join(local_model_dir, model_ID)
 
                     logger.info("Checking disk space...")
                     utils.check_disk_space()
@@ -156,7 +160,7 @@ if __name__ == "__main__":
                         models = model_IDs[model_type]
 
                         for model_ID in models:
-                            model_name = model_name_from_id(model_ID)
+                            model_name = model_name_from_id(model_ID, model_type)
                             try:
                                 predictions_path = os.path.join(
                                     model_results_dir,
