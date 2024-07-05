@@ -54,6 +54,15 @@ def model_name_from_id(model_id: str) -> str:
 def model_script_path(model_type: str, model_id: str) -> str:
     model_name = model_name_from_id(model_id)
     script_path = os.path.join(model_dir, model_type, f"{model_name}.py")
+
     if os.path.exists(script_path):
-        return os.path.join(base_path, "scripts", f"{model_type}.py")
-    return script_path
+        return script_path
+
+    if "base" in model_type:
+        fallback_type = "base"
+    elif "tuned" in model_type:
+        fallback_type = "tuned"
+    else:
+        fallback_type = model_type
+
+    return os.path.join(base_path, "scripts", f"{fallback_type}.py")
