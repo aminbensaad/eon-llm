@@ -2,6 +2,7 @@ import logging
 import shutil
 import os
 import glob
+import torch
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -44,3 +45,23 @@ def remove_safetensors_files(cache_dir=None):
                 print(f"Removed: {file_path}")
             except OSError as e:
                 print(f"Error removing {file_path}: {e}")
+
+
+def test_gpu_matrix_multiplication():
+    # Test if GPU is available
+    is_cuda_available = torch.cuda.is_available()
+    print("CUDA available:", is_cuda_available)
+
+    if is_cuda_available:
+        # Create two random tensors and move them to the GPU
+        x = torch.rand(10000, 10000).cuda()
+        y = torch.rand(10000, 10000).cuda()
+
+        # Perform a matrix multiplication
+        z = torch.matmul(x, y)
+
+        print("Matrix multiplication result shape:", z.shape)
+    else:
+        print(
+            "CUDA is not available. Please ensure you have a compatible GPU and the proper drivers installed."
+        )
