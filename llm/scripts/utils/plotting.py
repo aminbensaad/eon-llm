@@ -303,15 +303,15 @@ def plot_timing_heat_map(df, figure_root, model_names, cmap="Reds"):
     # Extract timing results and reshape data
     timing_data = df_sorted[["short_name", "SQuAD", "G"]].set_index("short_name")
     timing_data.columns = ["SQuAD v2.0", "GermanQuAD"]
-
-    # Update index labels with manual model name map
+    # update model names
     timing_data.index = [model_names.get(name, name) for name in timing_data.index]
 
-    # Convert times to integers and round down
-    timing_data = timing_data.fillna(0).astype(int)
-
     # Calculate the average time
+    timing_data = timing_data.fillna(0).astype(int)
     timing_data["Avg time"] = timing_data.mean(axis=1)
+
+    # Sort by average time
+    timing_data = timing_data.sort_values(by="Avg time")
 
     # Create annotations with formatted times and scores
     annotations = timing_data.applymap(
@@ -320,10 +320,7 @@ def plot_timing_heat_map(df, figure_root, model_names, cmap="Reds"):
 
     # Create the heatmap
     sns.heatmap(timing_data, annot=annotations, fmt="", cmap=cmap)
-
     plt.title("Model Inference Time")
-
-    # Rotate the axis descriptions by 90°
     plt.xticks(rotation=0)
     plt.yticks(rotation=0)
 
