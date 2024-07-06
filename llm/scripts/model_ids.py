@@ -32,6 +32,7 @@ model_IDs = {
         "deepset/roberta-base-squad2",  # ✅
         "deepset/roberta-large-squad2",  # ✅
         "deepset/xlm-roberta-base-squad2",
+        "deepset/tinyroberta-squad2",
     ],
     "Gtuned": [  # German models (fine-tuned on GermanQuAD)
         "deutsche-telekom/bert-multi-english-german-squad2",  # ✅
