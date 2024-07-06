@@ -98,8 +98,11 @@ def plot_gardner_quadrant(df, dataset_name, figure_root, model_names):
         df_sorted["eval_other"], df_sorted["eval_v2_score_hasAns"], c="b", alpha=0.5
     )
     for i, txt in enumerate(df_sorted["short_name"]):
+        model_name = model_names.get(txt, txt).split("\n")[
+            0
+        ]  # Extract only the model name
         plt.annotate(
-            model_names.get(txt, txt),
+            model_name,
             (df_sorted["eval_other"].iat[i], df_sorted["eval_v2_score_hasAns"].iat[i]),
         )
 
