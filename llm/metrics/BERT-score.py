@@ -20,10 +20,6 @@ Dependencies:
 
 import json
 import sys
-
-# Ensure required packages are installed
-# subprocess.check_call([sys.executable, "-m", "pip", "install", "bert-score"])
-
 from bert_score import score
 
 
@@ -76,7 +72,15 @@ def load_data(predictions_file, references_file):
     )
 
 
+def replace_special_tokens(texts, special_tokens=["[CLS]", "[SEP]"], replacement=""):
+    return [replacement if text in special_tokens else text for text in texts]
+
+
 def calculate_bertscore(candidates, references, lang):
+    # Replace special tokens with an empty string or any placeholder text
+    candidates = replace_special_tokens(candidates)
+    references = replace_special_tokens(references)
+
     if not candidates or not references:
         print("Error: Candidates or references list is empty.")
         return {"Precision": 0.0, "Recall": 0.0, "F1": 0.0}
@@ -144,5 +148,4 @@ if __name__ == "__main__":
     # Set language for BERTScore
     lang = "de" if is_german else "en"
 
-    # Run the main function
     main(predictions_path, dataset_path, output_path, lang)

@@ -156,13 +156,13 @@
     },
     "bertscore": {
       "BERTScore": {
-        "Precision": NaN,
-        "Recall": 0.8353667855262756,
+        "Precision": 0.7888571619987488,
+        "Recall": 0.8239350914955139,
         "F1": 0.8029347062110901
       },
       "HasAns_BERTScore": {
-        "Precision": NaN,
-        "Recall": 0.8353667855262756,
+        "Precision": 0.7888571619987488,
+        "Recall": 0.8239350914955139,
         "F1": 0.8029347062110901
       },
       "NoAns_BERTScore": {

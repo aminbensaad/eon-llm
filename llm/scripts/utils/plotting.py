@@ -4,6 +4,7 @@ import json
 import matplotlib.pyplot as plt
 import seaborn as sns
 from IPython.display import display
+from adjustText import adjust_text
 
 
 def plot_answer_length_distribution(base_dir):
@@ -97,11 +98,31 @@ def plot_gardner_quadrant(df, dataset_name, figure_root, model_names):
     plt.scatter(
         df_sorted["eval_other"], df_sorted["eval_v2_score_hasAns"], c="b", alpha=0.5
     )
+
+    texts = []
     for i, txt in enumerate(df_sorted["short_name"]):
-        plt.annotate(
-            model_names.get(txt, txt),
-            (df_sorted["eval_other"].iat[i], df_sorted["eval_v2_score_hasAns"].iat[i]),
+        model_name = model_names.get(txt, txt).split("\n")[
+            0
+        ]  # Extract only the model name
+        texts.append(
+            plt.text(
+                df_sorted["eval_other"].iat[i],
+                df_sorted["eval_v2_score_hasAns"].iat[i],
+                model_name,
+                fontsize=10,
+                ha="right",
+            )
         )
+
+    # Use adjust_text to minimize overlaps
+    adjust_text(
+        texts,
+        only_move={"text": "y"},
+        expand_text=(1.2, 1.2),
+        expand_points=(1.2, 1.2),
+        force_text=0.3,
+        force_points=0.3,
+    )
 
     plt.xlabel("BBR Score (BLEU, BERT, ROUGE)")
     plt.ylabel("Eval V2 Score (F1, Exact Match)")
@@ -328,7 +349,7 @@ def plot_combined_heat_map(df, figure_root, model_names, cmap="Greens"):
 
     # Split the dataframe into SQuAD and GermanQuAD
     squad_df = df[df["dataset"] == "SQuAD"][relevant_columns]
-    germanquad_df = df[df["dataset"] == "G"][relevant_columns]
+    germanquad_df = df[df["dataset"] == "GermanQuAD"][relevant_columns]
 
     # Ensure 'short_name' is included in both dataframes
     squad_df = squad_df.set_index("short_name")
