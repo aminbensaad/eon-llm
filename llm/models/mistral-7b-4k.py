@@ -1,5 +1,10 @@
 import logging
-from transformers import AutoTokenizer, pipeline, BitsAndBytesConfig, AutoModelForCausalLM
+from transformers import (
+    AutoTokenizer,
+    pipeline,
+    BitsAndBytesConfig,
+    AutoModelForCausalLM,
+)
 import torch
 import json
 from tqdm import tqdm
@@ -8,27 +13,27 @@ import os
 from awq import AutoAWQForCausalLM
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from scripts.utils import utils
+from llm.scripts.utils import predict
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)  # Changed to INFO for standard output
 logger = logging.getLogger(__name__)
 
-#Quantization
+# Quantization
 quantization_config = BitsAndBytesConfig(
     load_in_4bit=True,
     bnb_4bit_quant_type="nf4",
     bnb_4bit_use_double_quant=True,
 )
-#Falcon Pipeline
+# Falcon Pipeline
 model_id = "TheBloke/Mistral-7B-v0.1-AWQ"
-model = AutoAWQForCausalLM.from_quantized(model_id, fuse_layers=True,
-                                          trust_remote_code=False, safetensors=True)
+model = AutoAWQForCausalLM.from_quantized(
+    model_id, fuse_layers=True, trust_remote_code=False, safetensors=True
+)
 tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=False)
 
+
 def main(input_path, output_path):
-    logger.info("Loading the tokenizer and model...")
-    utils.check_disk_space()
 
     # Load the tokenizer and model
     # tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -38,16 +43,16 @@ def main(input_path, output_path):
         tokenizer.add_special_tokens({"pad_token": tokenizer.eos_token})
 
     # try:
-        # generation_pipeline = pipeline(
-        #     "text-generation",
-        #     model=model_name,
-        #     tokenizer=tokenizer,
-        #     torch_dtype=torch.bfloat16,
-        #     device_map="auto",
-        # )
+    # generation_pipeline = pipeline(
+    #     "text-generation",
+    #     model=model_name,
+    #     tokenizer=tokenizer,
+    #     torch_dtype=torch.bfloat16,
+    #     device_map="auto",
+    # )
     # except Exception as e:
-        # logger.error(f"Failed to load model: {e}")
-        # return
+    # logger.error(f"Failed to load model: {e}")
+    # return
 
     logger.info(f"Loading dataset from {input_path}...")
     # Load dataset data
@@ -57,17 +62,23 @@ def main(input_path, output_path):
     def answer_question_with_pipeline(question, context, max_new_tokens=250):
         prompt = f"{question}\n{context}\nAnswer:"
 
-        tokens = tokenizer(prompt, return_tensors='pt').input_ids.cuda()
+        tokens = tokenizer(prompt, return_tensors="pt").input_ids.cuda()
         generation_output = model.generate(
             tokens,
             do_sample=True,
             temperature=0.7,
             top_p=0.95,
             top_k=40,
-            max_new_tokens=512
+            max_new_tokens=512,
         )
-        print(tokenizer.decode(generation_output[0]["generated_text"].split("Answer:")[1]).strip())
-        return tokenizer.decode(generation_output[0]["generated_text"].split("Answer:")[1]).strip()
+        print(
+            tokenizer.decode(
+                generation_output[0]["generated_text"].split("Answer:")[1]
+            ).strip()
+        )
+        return tokenizer.decode(
+            generation_output[0]["generated_text"].split("Answer:")[1]
+        ).strip()
 
     logger.info("Generating answers for all articles in the dev set...")
     results = []
@@ -108,4 +119,3 @@ if __name__ == "__main__":
     input_path = sys.argv[1]
     output_path = sys.argv[2]
     main(input_path, output_path)
-

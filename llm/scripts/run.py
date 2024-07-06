@@ -5,11 +5,14 @@ import argparse
 import sys
 
 # Ensure the script is running in the "llm/scripts" directory
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+script_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(script_dir)
+sys.path.append(os.path.abspath(os.path.join(script_dir, "..", "scripts")))
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from scripts.utils import utils
-from scripts.model_ids import (
+import utils.run_utils as run
+import utils.core as core
+
+from model_ids import (
     base_path,
     model_script_path,
     local_model_dir,
@@ -135,14 +138,14 @@ if __name__ == "__main__":
                         model_ID = os.path.join(local_model_dir, model_ID)
 
                     logger.info("Checking disk space...")
-                    utils.check_disk_space()
+                    core.check_disk_space()
                     start_time = time.time()
-                    utils.run_model_script(script, model_ID, input_path, output_path)
+                    run.run_model_script(script, model_ID, input_path, output_path)
                     end_time = time.time()
                     elapsed_time = end_time - start_time
 
                     # Store timing results
-                    utils.store_timing_results(
+                    run.store_timing_results(
                         timing_results_path, model_name, dataset, elapsed_time
                     )
 
@@ -172,7 +175,7 @@ if __name__ == "__main__":
                                     model_type,
                                     f"{model_name}_eval_results.json",
                                 )
-                                utils.evaluate_model_results(
+                                run.evaluate_model_results(
                                     metrics_dir,
                                     eval_results_dir,
                                     predictions_path,

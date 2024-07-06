@@ -6,16 +6,21 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Ensure the script can access utils.py
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-from scripts.utils import utils
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, "..", "..", "scripts"))
+sys.path.append(project_root)
+
+import utils.predict as predict
 
 
 def main(model_name, input_path, output_path):
-    utils.generate_answers_with_sliding_window(
+    predict.generate_answers_with_sliding_window(
         model_name, input_path, output_path, use_token_type_ids=False
     )
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    model_name = sys.argv[1]
+    input_path = sys.argv[2]
+    output_path = sys.argv[3]
+    main(model_name, input_path, output_path)
