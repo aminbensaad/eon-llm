@@ -45,7 +45,7 @@ This directory covers all LLM-related research directories and files, including:
 - The summarized evaluation results for the defined metrics (e.g., BLEU, ROUGE, F1, exact match, ...) in 'metrics'.
 
 **figures:**
-- The resulting figures from our plotting of evaluation results in 'level-0.ipynb'.
+- The resulting figures from our plotting of evaluation results in 'experiments.ipynb'.
 
 **metrics:**
 - The defined metrics to evaluate model results.
@@ -59,7 +59,7 @@ This directory covers all LLM-related research directories and files, including:
 **scripts:**
 - The scripts to execute model fine-tuning (`fine-tune.py`), run predictions (`run.py` with commands `base.py` for pre-trained models and `tuned.py` for fine-tuned models), and utility functions (`utils.py`).
 
-**level-0.ipynb:**
+**experiments.ipynb:**
 - This Jupyter notebook is used for experimentation and to generate visualizations for model & evaluation results.
 
 **timing_results.json:**
