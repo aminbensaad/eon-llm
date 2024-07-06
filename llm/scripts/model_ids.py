@@ -7,9 +7,9 @@ model_dir = os.path.join(base_path, "models")
 model_IDs = {
     "base": [  # German base models (pre-trained)
         "TheBloke/mistral-ft-optimized-1227-GGUF",
-        "tiiuae/falcon-7b-instruct",  # ✅
+        "tiiuae/falcon-7b-instruct",
         "gradientai/Llama-3-8B-Instruct-Gradient-1048k",
-        "nvidia/Llama3-ChatQA-1.5-8B",  # ✅
+        "nvidia/Llama3-ChatQA-1.5-8B",
         "mistralai/Mistral-7B-Instruct-v0.1",
         "meta-llama/Meta-Llama-3-8B-Instruct",
         "mistralai/Mixtral-8x7B-Instruct-v0.1",  # PENDING access
@@ -26,22 +26,22 @@ model_IDs = {
         "TheBloke/DiscoLM_German_7b_v1-GGUF",
     ],
     "tuned": [  # General models (fine-tuned on SQuAD)
-        "google-bert/bert-large-cased-whole-word-masking-finetuned-squad",  # ✅
-        "distilbert/distilbert-base-cased-distilled-squad",  # ✅
-        "timpal0l/mdeberta-v3-base-squad2",  # ✅
-        "deepset/roberta-base-squad2",  # ✅
-        "deepset/roberta-large-squad2",  # ✅
+        "google-bert/bert-large-cased-whole-word-masking-finetuned-squad",
+        "distilbert/distilbert-base-cased-distilled-squad",
+        "timpal0l/mdeberta-v3-base-squad2",
+        "deepset/roberta-base-squad2",
+        "deepset/roberta-large-squad2",
         "deepset/xlm-roberta-base-squad2",
         "deepset/tinyroberta-squad2",
     ],
     "Gtuned": [  # German models (fine-tuned on GermanQuAD)
-        "deutsche-telekom/bert-multi-english-german-squad2",  # ✅
+        "deutsche-telekom/bert-multi-english-german-squad2",
         "deepset/gelectra-base-germanquad-distilled",
-        "deepset/gelectra-base-germanquad",  # ✅
-        "deepset/gelectra-large-germanquad",  # ✅
+        "deepset/gelectra-base-germanquad",
+        "deepset/gelectra-large-germanquad",
     ],
     "local": [
-        "bert-finetuned-squad/checkpoint-33276",  # ✅
+        "bert-finetuned-squad/checkpoint-33276",
     ],
 }
 
