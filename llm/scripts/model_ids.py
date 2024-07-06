@@ -61,7 +61,7 @@ def model_script_path(model_type: str, model_id: str) -> str:
 
     if "base" in model_type:
         fallback_type = "base"
-    elif "tuned" in model_type:
+    elif "tuned" in model_type or "local" in model_type:
         fallback_type = "tuned"
     else:
         fallback_type = model_type
