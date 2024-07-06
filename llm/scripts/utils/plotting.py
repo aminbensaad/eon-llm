@@ -328,7 +328,7 @@ def plot_combined_heat_map(df, figure_root, model_names, cmap="Greens"):
 
     # Split the dataframe into SQuAD and GermanQuAD
     squad_df = df[df["dataset"] == "SQuAD"][relevant_columns]
-    germanquad_df = df[df["dataset"] == "G"][relevant_columns]
+    germanquad_df = df[df["dataset"] == "GermanQuAD"][relevant_columns]
 
     # Ensure 'short_name' is included in both dataframes
     squad_df = squad_df.set_index("short_name")
