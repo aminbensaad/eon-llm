@@ -32,7 +32,6 @@ model_IDs = {
         "deepset/roberta-base-squad2",  # ✅
         "deepset/roberta-large-squad2",  # ✅
         "deepset/xlm-roberta-base-squad2",
-        os.path.join(local_model_dir, "bert-finetuned-squad/checkpoint-33276"),  # ✅
     ],
     "Gtuned": [  # German models (fine-tuned on GermanQuAD)
         "deutsche-telekom/bert-multi-english-german-squad2",  # ✅
@@ -40,15 +39,17 @@ model_IDs = {
         "deepset/gelectra-base-germanquad",  # ✅
         "deepset/gelectra-large-germanquad",  # ✅
     ],
+    "local": [
+        "bert-finetuned-squad/checkpoint-33276",  # ✅
+    ],
 }
 
 
-def model_name_from_id(model_id: str) -> str:
+def model_name_from_id(model_id: str, model_type: str = "") -> str:
     model_id_components = model_id.split("/")
-    if len(model_id_components) > 2:
+    if model_type == "local":
         return model_id_components[-2]
-    else:
-        return model_id_components[-1]
+    return model_id_components[-1]
 
 
 def model_script_path(model_type: str, model_id: str) -> str:

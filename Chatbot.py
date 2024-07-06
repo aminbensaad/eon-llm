@@ -14,6 +14,7 @@ model_type_labels = {
     "Base": "base",
     "SQuAD Tuned": "tuned",
     "GermanSQuAD Tuned": "Gtuned",
+    "Local Model": "local",
 }
 for l, t in model_type_labels.items():
     models[l] = model_ids.model_IDs[t]
@@ -22,12 +23,39 @@ for l, t in model_type_labels.items():
 model_list = []
 
 
+def create_initial_message():
+    st.session_state["messages"] = [
+        {"role": "assistant", "content": "How can I help you?"}
+    ]
+
+
+if not "context" in st.session_state:
+    st.session_state["context"] = "No context."
+
+
+def fix_path(path: str) -> str:
+    fixed_path = os.path.join("llm", "dummy", path)
+    return os.path.normpath(fixed_path)
+
+
+def generate_history_context():
+    context = (
+        "This is a chat between 'user' and 'assistant' with the following messages:\n"
+    )
+    message_history = st.session_state.messages
+    print("history: ", message_history)
+    for msg in message_history:
+        role = msg["role"]
+        content = msg["content"]
+        context += f"{role}: {content}\n"
+    return context
+
+
 def load_model() -> types.ModuleType | None:
     current_model_type = model_type_labels[st.session_state["category_selection"]]
     current_model_id = st.session_state["model_selection"]
     script = model_ids.model_script_path(current_model_type, current_model_id)
-    fixed_script_path = os.path.join("llm", "dummy", script)
-    fixed_script_path = os.path.normpath(fixed_script_path)
+    fixed_script_path = fix_path(script)
 
     if not os.path.exists(fixed_script_path):
         st.error(f"Unable to find model script at '{fixed_script_path}'")
@@ -60,47 +88,32 @@ def on_category_change():
 
 
 def on_model_change():
-    global model_module
     st.session_state["model_module"] = load_model()
+    create_initial_message()
 
 
-with st.sidebar:
-    current_category = st.selectbox(
-        "Category",
-        models.keys(),
-        on_change=on_category_change,
-        key="category_selection",
-    )
-    model_list = models.get(str(current_category), [])
-    model_selection = st.selectbox(
-        "Model",
-        model_list,
-        index=None,
-        on_change=on_model_change,
-        key="model_selection",
-    )
+def on_context_input_changed():
+    st.session_state["use_history"] = False
 
 
-def answer_question(question, message_history) -> str:
-    model_module = st.session_state["model_module"]
+def on_history_context_changed():
+    if not st.session_state["use_history"]:
+        return
+
+    st.session_state["context"] = generate_history_context()
+
+
+def answer_question(question) -> str:
+    model_module = st.session_state.get("model_module", None)
     if not model_module:
         return "Please select a model"
-
-    message_context = ""
-    for msg in message_history:
-        role = msg["role"]
-        content = msg["content"]
-        message_context += f"{role}: {content}\n"
-    # overwrite context for now since I was unable to engineer a prompt which
-    # allows the model to understand the message history
-    message_context = "Anwer the following question."
 
     model_input = {
         "data": [
             {
                 "paragraphs": [
                     {
-                        "context": message_context,
+                        "context": st.session_state["context_input"],
                         "qas": [{"id": 0, "question": question}],
                     }
                 ]
@@ -108,13 +121,16 @@ def answer_question(question, message_history) -> str:
         ]
     }
     print(model_input)
-    with tempfile.NamedTemporaryFile("w", delete=False) as tmp_file:
+    with tempfile.NamedTemporaryFile("w") as tmp_file:
         json.dump(model_input, tmp_file)
         tmp_file.flush()
         out_file = tempfile.NamedTemporaryFile()
-        model_module.main(
-            st.session_state["model_selection"], tmp_file.name, out_file.name
-        )
+        model_id = st.session_state["model_selection"]
+        current_model_type = model_type_labels[st.session_state["category_selection"]]
+        if current_model_type == "local":
+            model_id = os.path.join(model_ids.local_model_dir, model_id)
+            model_id = fix_path(model_id)
+        model_module.main(model_id, tmp_file.name, out_file.name)
         return json.load(out_file).get("0", "Unable to generate answer")
 
 
@@ -132,9 +148,7 @@ with col2:
 
 st.caption("🚀 A streamlit chatbot powered by OpenAI LLM")
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [
-        {"role": "assistant", "content": "How can I help you?"}
-    ]
+    create_initial_message()
 
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
@@ -143,8 +157,39 @@ if prompt := st.chat_input():
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
 
-    message_history = st.session_state.messages
-    answer = answer_question(prompt, message_history)
+    answer = answer_question(prompt)
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("assistant").write(answer)
+    print("messages: ", st.session_state.messages)
+    print("history 2: ", generate_history_context())
+    if st.session_state["use_history"]:
+        st.session_state["context"] = generate_history_context()
+
+with st.sidebar:
+    current_category = st.selectbox(
+        "Category",
+        models.keys(),
+        on_change=on_category_change,
+        key="category_selection",
+    )
+    model_list = models.get(str(current_category), [])
+    model_selection = st.selectbox(
+        "Model",
+        model_list,
+        index=None,
+        on_change=on_model_change,
+        key="model_selection",
+    )
+    st.text_area(
+        "Context",
+        st.session_state["context"],
+        key="context_input",
+        on_change=on_context_input_changed,
+        height=300,
+    )
+    st.checkbox(
+        "Use history as context",
+        key="use_history",
+        on_change=on_history_context_changed,
+    )
