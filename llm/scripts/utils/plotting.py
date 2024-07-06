@@ -117,7 +117,7 @@ def plot_gardner_quadrant(df, dataset_name, figure_root, model_names):
 
 
 # Function to plot heat map
-def plot_heat_map(df, dataset_name, figure_root, model_names):
+def plot_heat_map(df, dataset_name, figure_root, model_names, cmap="Greens"):
     df_sorted = df[df["dataset"] == dataset_name].sort_values(by="overall_score")
     plt.figure(figsize=(12, 8))
 
@@ -144,7 +144,7 @@ def plot_heat_map(df, dataset_name, figure_root, model_names):
     heat_data.index = [model_names.get(name, name) for name in heat_data.index]
 
     # Create the heatmap
-    sns.heatmap(heat_data, annot=True, cmap="Greens")
+    sns.heatmap(heat_data, annot=True, cmap=cmap)
 
     plt.title(f"Model Metrics Heatmap - {dataset_name}")
 
@@ -238,7 +238,7 @@ def plot_bar_chart_comparison(df, dataset_name, figure_root, model_names):
 
 
 # Function to plot heat map to compare overall exact and f1 with HasAns exact and f1
-def plot_comparison_heat_map(df, dataset_name, figure_root, model_names):
+def plot_comparison_heat_map(df, dataset_name, figure_root, model_names, cmap="Blues"):
     df_sorted = df[df["dataset"] == dataset_name].sort_values("overall_score")
     plt.figure(figsize=(14, 8))
 
@@ -259,7 +259,7 @@ def plot_comparison_heat_map(df, dataset_name, figure_root, model_names):
     ]
 
     # Create the heatmap
-    sns.heatmap(heat_data_comparison, annot=True, cmap="Blues")
+    sns.heatmap(heat_data_comparison, annot=True, cmap=cmap)
 
     plt.title(
         f"Comparison of F1 & Exact Match Scores Overall and for Questions with Answers - {dataset_name}"
@@ -273,7 +273,7 @@ def plot_comparison_heat_map(df, dataset_name, figure_root, model_names):
 
 
 # Function to plot heat map for timing results
-def plot_timing_heat_map(df, figure_root, model_names):
+def plot_timing_heat_map(df, figure_root, model_names, cmap="Reds"):
     # Sort the dataframe by overall_score
     df_sorted = df.sort_values("overall_score").drop_duplicates(subset=["short_name"])
 
@@ -298,7 +298,7 @@ def plot_timing_heat_map(df, figure_root, model_names):
     )
 
     # Create the heatmap
-    sns.heatmap(timing_data, annot=annotations, fmt="", cmap="Reds")
+    sns.heatmap(timing_data, annot=annotations, fmt="", cmap=cmap)
 
     plt.title("Model Inference Time")
 
@@ -314,7 +314,7 @@ def plot_timing_heat_map(df, figure_root, model_names):
 
 
 # Function to plot combined heat map for average values of GermanQuAD and SQuAD
-def plot_combined_heat_map(df, figure_root, model_names):
+def plot_combined_heat_map(df, figure_root, model_names, cmap="Greens"):
     # Select the relevant columns for both datasets
     relevant_columns = [
         "short_name",
@@ -354,7 +354,7 @@ def plot_combined_heat_map(df, figure_root, model_names):
     heat_data_sorted = heat_data.sort_values(by="OVERALL")
     plt.figure(figsize=(12, 8))
 
-    sns.heatmap(heat_data_sorted, annot=True, cmap="Greens")
+    sns.heatmap(heat_data_sorted, annot=True, cmap=cmap)
 
     plt.title("Combined Model Metrics Heatmap")
 
