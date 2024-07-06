@@ -164,6 +164,7 @@ def answer_question(question: str) -> str:
         model_module.main(model_id, tmp_file.name, out_file.name)
         return json.load(out_file).get("0", "Unable to generate answer")
 
+
 ##################################################
 ################# Initialization #################
 ##################################################
@@ -187,11 +188,11 @@ with col1:
     """,
         unsafe_allow_html=True,
     )
-    st.image("assets/eon-logo.png", width=120, output_format="PNG")
+    st.image("../assets/eon-logo.png", width=120, output_format="PNG")
 with col2:
     st.title("Chatbot")
 
-st.caption("🚀 A streamlit chatbot powered by OpenAI LLM")
+st.caption("🚀 A streamlit chatbot powered by our evaluated models.")
 
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
