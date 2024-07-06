@@ -43,7 +43,6 @@ def generate_history_context():
         "This is a chat between 'user' and 'assistant' with the following messages:\n"
     )
     message_history = st.session_state.messages
-    print("history: ", message_history)
     for msg in message_history:
         role = msg["role"]
         content = msg["content"]
@@ -120,7 +119,7 @@ def answer_question(question) -> str:
             }
         ]
     }
-    print(model_input)
+    print("Input: ", model_input)
     with tempfile.NamedTemporaryFile("w") as tmp_file:
         json.dump(model_input, tmp_file)
         tmp_file.flush()
@@ -161,8 +160,6 @@ if prompt := st.chat_input():
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.chat_message("assistant").write(answer)
-    print("messages: ", st.session_state.messages)
-    print("history 2: ", generate_history_context())
     if st.session_state["use_history"]:
         st.session_state["context"] = generate_history_context()
 
