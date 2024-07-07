@@ -38,5 +38,13 @@
     "gelectra-large-germanquad": {
         "SQuAD": 5888.141892194748,
         "G": 1986.069657087326
+    },
+    "tinyroberta-squad2": {
+        "G": 733.9087131023407,
+        "SQuAD": 1252.9626789093018
+    },
+    "bert-finetuned-squad": {
+        "G": 1154.7622089385986,
+        "SQuAD": 2144.2196831703186
     }
 }
