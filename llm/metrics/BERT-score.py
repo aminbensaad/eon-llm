@@ -72,7 +72,9 @@ def load_data(predictions_file, references_file):
     )
 
 
-def replace_special_tokens(texts, special_tokens=["[CLS]", "[SEP]"], replacement=""):
+def replace_special_tokens(
+    texts, special_tokens=["[CLS]", "[SEP]", "[PAD]"], replacement=""
+):
     return [replacement if text in special_tokens else text for text in texts]
 
 
