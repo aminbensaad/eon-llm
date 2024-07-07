@@ -27,7 +27,7 @@ def load_pipeline(model_name):
 
 def load_dataset(input_path):
     logger.info(f"Loading dataset from {input_path}...")
-    with open(input_path, "r") as f:
+    with open(input_path, "r", encoding='utf-8') as f:
         dataset_data = json.load(f)
     return dataset_data
 
