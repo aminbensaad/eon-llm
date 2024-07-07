@@ -18,6 +18,8 @@ model_IDs = {
         "BarraHome/Mistroll-7B-v2.2",
         "yam-peleg/Experiment26-7B",
         "MTSAIR/multi_verse_model",
+        "FacebookAI/roberta-base",
+        "google-bert/bert-base-cased",
     ],
     "Gbase": [  # German base models (pre-trained)
         "philschmid/instruct-igel-001",
