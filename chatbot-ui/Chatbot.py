@@ -21,8 +21,8 @@ from llm.scripts import model_ids as model_ids
 
 # translate UI labels to internal model_type
 model_type_labels = {
-    "Base": "base",
     "SQuAD Tuned": "tuned",
+    "Base": "base",
     "GermanSQuAD Tuned": "Gtuned",
     "Local Model": "local",
 }
