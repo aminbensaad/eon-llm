@@ -3,6 +3,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import json
 from tqdm import tqdm
 import torch
+import sys
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -21,7 +22,7 @@ def main(model_name, input_path, output_path):
 
     logger.info(f"Loading dataset from {input_path}...")
     # Load dataset data
-    with open(input_path, "r") as f:
+    with open(input_path, "r", encoding='utf-8') as f:
         dataset_data = json.load(f)
 
     logger.info("Generating answers for all questions in the dataset...")
@@ -51,6 +52,7 @@ def main(model_name, input_path, output_path):
                     top_k=10,
                     num_return_sequences=1,
                     eos_token_id=tokenizer.eos_token_id,
+                    pad_token_id=tokenizer.eos_token_id
                 )
                 answer = output[0]["generated_text"].split("[/INST]")[-1].strip()
                 answers.append(answer)
@@ -84,6 +86,6 @@ def main(model_name, input_path, output_path):
 
 if __name__ == "__main__":
     model_name = "meta-llama/Meta-Llama-3-8B-Instruct"
-    input_path = "../data/SQuAD/dev-v2.0.json"  # sys.argv[1]
-    output_path = f"../model_results/base/{model_name}_predictions.json"  # sys.argv[2]
+    input_path = sys.argv[2]
+    output_path = sys.argv[3]
     main(model_name, input_path, output_path)

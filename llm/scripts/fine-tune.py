@@ -26,11 +26,12 @@ from transformers import (
     TrainingArguments,
     Trainer,
 )
-from datasets import load_dataset, DatasetDict, Dataset
+from datasets import DatasetDict, Dataset
 import torch
 import json
 from sklearn.model_selection import train_test_split
 from peft import LoraConfig, get_peft_model, TaskType  # Import PEFT
+from utils.predict import load_dataset
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -48,14 +49,13 @@ print_disk_quota()
 
 # Define constants
 base = ".."
-MODEL_NAME = "meta-llama/Meta-Llama-3-8B"  # Change to any model from the list
-TRAIN_DATASET_PATH = os.path.join(base, "data/SQuAD/train-v2.0.json")
+MODEL_NAME = "deepset/roberta-large-squad2"  # Change to any model from the list
+TRAIN_DATASET_PATH = os.path.join(base, "data/GermanQuAD/GermanQuAD_train.json")
 OUTPUT_DIR = "./results"
 
 
 def load_and_split_dataset(train_path, split_ratio=0.2):
-    with open(train_path, "r") as f:
-        train_data = json.load(f)
+    train_data = load_dataset(train_path)
 
     articles = train_data["data"]
     contexts, questions, answers = [], [], []
