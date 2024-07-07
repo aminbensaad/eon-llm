@@ -7,7 +7,7 @@ from IPython.display import display
 from adjustText import adjust_text
 
 
-def plot_answer_length_distribution(base_dir):
+def plot_answer_length_distribution(base_dir, fontsize=12, figsize=(10, 6)):
     all_answer_lengths = []
 
     # Iterate through all JSON files in the directory
@@ -25,19 +25,21 @@ def plot_answer_length_distribution(base_dir):
                 all_answer_lengths.extend(answer_lengths)
 
     # Plot the distribution of answer lengths
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=figsize)
     plt.hist(all_answer_lengths, bins=30, edgecolor="k", alpha=0.7)
-    plt.xlabel("Answer Length (characters)")
-    plt.ylabel("Frequency")
-    plt.title("Distribution of Answer Lengths Across All Files")
+    plt.xlabel("Answer Length (characters)", fontsize=fontsize)
+    plt.ylabel("Frequency", fontsize=fontsize)
+    plt.title("Distribution of Answer Lengths Across All Files", fontsize=fontsize)
     plt.grid(True)
     plt.show()
 
 
 # Function to plot bar chart with line graph for overall_score
-def plot_bar_chart_with_line_graph(df, dataset_name, figure_root, model_names):
+def plot_bar_chart_with_line_graph(
+    df, dataset_name, figure_root, model_names, fontsize=12, figsize=(8, 8)
+):
     df_sorted = df[df["dataset"] == dataset_name].sort_values(by="overall_score")
-    plt.figure(figsize=(23, 6))
+    plt.figure(figsize=figsize)
     bar_width = 0.25
     index = np.arange(len(df_sorted))
 
@@ -72,15 +74,17 @@ def plot_bar_chart_with_line_graph(df, dataset_name, figure_root, model_names):
         label="Overall Score",
     )
 
-    plt.xlabel("Models")
-    plt.ylabel("Scores")
-    plt.title(f"Model Comparison (ascending order) - {dataset_name}")
+    plt.xlabel("Models", fontsize=fontsize)
+    plt.ylabel("Scores", fontsize=fontsize)
+    plt.title(f"Model Comparison (ascending order) - {dataset_name}", fontsize=fontsize)
     plt.xticks(
         index + bar_width,
         [model_names.get(name, name) for name in df_sorted["short_name"]],
         rotation=0,
+        fontsize=fontsize,
     )
-    plt.legend()
+    plt.yticks(fontsize=fontsize)
+    plt.legend(fontsize=fontsize)
 
     plt.tight_layout()
 
@@ -92,9 +96,11 @@ def plot_bar_chart_with_line_graph(df, dataset_name, figure_root, model_names):
 
 
 # Function to plot Gardner Quadrants Style graph
-def plot_gardner_quadrant(df, dataset_name, figure_root, model_names):
+def plot_gardner_quadrant(
+    df, dataset_name, figure_root, model_names, fontsize=12, figsize=(14, 6)
+):
     df_sorted = df[df["dataset"] == dataset_name].sort_values(by="overall_score")
-    plt.figure(figsize=(14, 6))
+    plt.figure(figsize=figsize)
     plt.scatter(
         df_sorted["eval_other"], df_sorted["eval_v2_score_hasAns"], c="b", alpha=0.5
     )
@@ -109,7 +115,7 @@ def plot_gardner_quadrant(df, dataset_name, figure_root, model_names):
                 df_sorted["eval_other"].iat[i],
                 df_sorted["eval_v2_score_hasAns"].iat[i],
                 model_name,
-                fontsize=10,
+                fontsize=fontsize,
                 ha="right",
             )
         )
@@ -124,9 +130,9 @@ def plot_gardner_quadrant(df, dataset_name, figure_root, model_names):
         force_points=0.3,
     )
 
-    plt.xlabel("BBR Score (BLEU, BERT, ROUGE)")
-    plt.ylabel("Eval V2 Score (F1, Exact Match)")
-    plt.title(f"Model Performance Gardner Quadrant - {dataset_name}")
+    plt.xlabel("BBR Score (BLEU, BERT, ROUGE)", fontsize=fontsize)
+    plt.ylabel("Eval V2 Score (F1, Exact Match)", fontsize=fontsize)
+    plt.title(f"Model Performance Gardner Quadrant - {dataset_name}", fontsize=fontsize)
 
     plt.grid(True)
 
@@ -138,9 +144,17 @@ def plot_gardner_quadrant(df, dataset_name, figure_root, model_names):
 
 
 # Function to plot heat map
-def plot_heat_map(df, dataset_name, figure_root, model_names, cmap="Greens"):
+def plot_heat_map(
+    df,
+    dataset_name,
+    figure_root,
+    model_names,
+    cmap="Greens",
+    fontsize=12,
+    figsize=(12, 8),
+):
     df_sorted = df[df["dataset"] == dataset_name].sort_values(by="overall_score")
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=figsize)
 
     # Select and rename the columns for the heatmap
     heat_data = df_sorted[
@@ -167,7 +181,9 @@ def plot_heat_map(df, dataset_name, figure_root, model_names, cmap="Greens"):
     # Create the heatmap
     sns.heatmap(heat_data, annot=True, cmap=cmap)
 
-    plt.title(f"Model Metrics Heatmap - {dataset_name}")
+    plt.title(f"Model Metrics Heatmap - {dataset_name}", fontsize=fontsize)
+    plt.xticks(fontsize=fontsize)
+    plt.yticks(fontsize=fontsize)
 
     # SAVE ⬇️
     save_path = os.path.join(figure_root, f"overall-heatmap-{dataset_name}.png")
@@ -177,9 +193,11 @@ def plot_heat_map(df, dataset_name, figure_root, model_names, cmap="Greens"):
 
 
 # Function to plot bar chart to compare overall exact and f1 with HasAns exact and f1
-def plot_bar_chart_comparison(df, dataset_name, figure_root, model_names):
+def plot_bar_chart_comparison(
+    df, dataset_name, figure_root, model_names, fontsize=12, figsize=(20, 6)
+):
     df_sorted = df[df["dataset"] == dataset_name].sort_values("overall_score")
-    plt.figure(figsize=(20, 6))
+    plt.figure(figsize=figsize)
     bar_width = 0.2
     index = np.arange(len(df_sorted))
 
@@ -237,31 +255,41 @@ def plot_bar_chart_comparison(df, dataset_name, figure_root, model_names):
         label="HasAns Average F1 & Exact",
     )
 
-    plt.xlabel("Models")
-    plt.ylabel("Scores")
+    plt.xlabel("Models", fontsize=fontsize)
+    plt.ylabel("Scores", fontsize=fontsize)
     plt.title(
-        f"Comparison of F1 & Exact Match Scores Overall and for Questions with Answers - {dataset_name}"
+        f"Comparison of F1 & Exact Match Scores Overall and for Questions with Answers - {dataset_name}",
+        fontsize=fontsize,
     )
     plt.xticks(
         index + 1.5 * bar_width,
         [model_names.get(name, name) for name in df_sorted["short_name"]],
         rotation=0,
+        fontsize=fontsize,
     )
-    plt.legend()
+    plt.yticks(fontsize=fontsize)
+    plt.legend(fontsize=fontsize)
 
     plt.tight_layout()
 
     # SAVE ⬇️
     save_path = os.path.join(figure_root, f"evaluate-v2-bar-chart-{dataset_name}.png")
     plt.savefig(save_path)
-
     plt.show()
 
 
 # Function to plot heat map to compare overall exact and f1 with HasAns exact and f1
-def plot_comparison_heat_map(df, dataset_name, figure_root, model_names, cmap="Blues"):
+def plot_comparison_heat_map(
+    df,
+    dataset_name,
+    figure_root,
+    model_names,
+    cmap="Blues",
+    fontsize=12,
+    figsize=(14, 8),
+):
     df_sorted = df[df["dataset"] == dataset_name].sort_values("overall_score")
-    plt.figure(figsize=(14, 8))
+    plt.figure(figsize=figsize)
 
     # Select and rename the columns for the heatmap
     heat_data_comparison = df_sorted[
@@ -283,8 +311,11 @@ def plot_comparison_heat_map(df, dataset_name, figure_root, model_names, cmap="B
     sns.heatmap(heat_data_comparison, annot=True, cmap=cmap)
 
     plt.title(
-        f"Comparison of F1 & Exact Match Scores Overall and for Questions with Answers - {dataset_name}"
+        f"Comparison of F1 & Exact Match Scores Overall and for Questions with Answers - {dataset_name}",
+        fontsize=fontsize,
     )
+    plt.xticks(fontsize=fontsize)
+    plt.yticks(fontsize=fontsize)
 
     # SAVE ⬇️
     save_path = os.path.join(figure_root, f"evaluate-v2-heatmap-{dataset_name}.png")
@@ -294,11 +325,13 @@ def plot_comparison_heat_map(df, dataset_name, figure_root, model_names, cmap="B
 
 
 # Function to plot heat map for timing results
-def plot_timing_heat_map(df, figure_root, model_names, cmap="Reds"):
+def plot_timing_heat_map(
+    df, figure_root, model_names, cmap="Reds", fontsize=12, figsize=(8, 8)
+):
     # Sort the dataframe by overall_score
     df_sorted = df.sort_values("overall_score").drop_duplicates(subset=["short_name"])
 
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=figsize)
 
     # Extract timing results and reshape data
     timing_data = df_sorted[["short_name", "SQuAD", "G"]].set_index("short_name")
@@ -320,9 +353,9 @@ def plot_timing_heat_map(df, figure_root, model_names, cmap="Reds"):
 
     # Create the heatmap
     sns.heatmap(timing_data, annot=annotations, fmt="", cmap=cmap)
-    plt.title("Model Inference Time")
-    plt.xticks(rotation=0)
-    plt.yticks(rotation=0)
+    plt.title("Model Inference Time", fontsize=fontsize)
+    plt.xticks(rotation=0, fontsize=fontsize)
+    plt.yticks(rotation=0, fontsize=fontsize)
 
     # SAVE ⬇️
     save_path = os.path.join(figure_root, "timing-results-heatmap.png")
@@ -332,7 +365,9 @@ def plot_timing_heat_map(df, figure_root, model_names, cmap="Reds"):
 
 
 # Function to plot combined heat map for average values of GermanQuAD and SQuAD
-def plot_combined_heat_map(df, figure_root, model_names, cmap="Greens"):
+def plot_combined_heat_map(
+    df, figure_root, model_names, cmap="Greens", fontsize=12, figsize=(12, 8)
+):
     # Select the relevant columns for both datasets
     relevant_columns = [
         "short_name",
@@ -370,11 +405,13 @@ def plot_combined_heat_map(df, figure_root, model_names, cmap="Greens"):
 
     # Plot the combined heat map
     heat_data_sorted = heat_data.sort_values(by="OVERALL")
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=figsize)
 
     sns.heatmap(heat_data_sorted, annot=True, cmap=cmap)
 
-    plt.title("Combined Model Metrics Heatmap")
+    plt.title("Combined Model Metrics Heatmap", fontsize=fontsize)
+    plt.xticks(fontsize=fontsize)
+    plt.yticks(fontsize=fontsize)
 
     # SAVE ⬇️
     save_path = os.path.join(figure_root, "combined-heatmap.png")
