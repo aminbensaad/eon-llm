@@ -6,8 +6,11 @@ from tqdm import tqdm
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from llm.scripts.utils import predict
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, "..", "..", "scripts"))
+sys.path.append(project_root)
+
+import utils.predict as predict
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -33,14 +36,12 @@ def main(model_name, input_path, output_path):
     with open(input_path, "r") as f:
         dataset_data = json.load(f)
 
-    def answer_question_with_sliding_window(
-        question, context, stride=128
-    ):
+    def answer_question_with_sliding_window(question, context, stride=128):
         inputs = tokenizer(
             question,
             context,
             add_special_tokens=True,
-            max_length=None, # automatically use max_length of model
+            max_length=None,  # automatically use max_length of model
             truncation=True,
             padding="max_length",
             return_tensors="pt",

@@ -6,8 +6,11 @@ from tqdm import tqdm
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from llm.scripts.utils import predict
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, "..", "scripts"))
+sys.path.append(project_root)
+
+import utils.predict as predict
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
