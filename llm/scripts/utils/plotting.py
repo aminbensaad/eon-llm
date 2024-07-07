@@ -418,3 +418,77 @@ def plot_combined_heat_map(
     plt.savefig(save_path)
 
     plt.show()
+
+
+def plot_combined_gardner_quadrant(df, figure_root, model_names, fontsize=12, figsize=(14, 6)):
+    # Select the relevant columns for both datasets
+    relevant_columns = [
+        "short_name",
+        "has_ans_f1",
+        "has_ans_exact",
+        "bleu_score",
+        "rouge_score",
+        "bert_score",
+        "exact",
+        "f1"
+    ]
+
+    # Split the dataframe into SQuAD and GermanQuAD
+    squad_df = df[df["dataset"] == "SQuAD"][relevant_columns]
+    germanquad_df = df[df["dataset"] == "GermanQuAD"][relevant_columns]
+
+    # Ensure 'short_name' is included in both dataframes
+    squad_df = squad_df.set_index("short_name")
+    germanquad_df = germanquad_df.set_index("short_name")
+
+    # Compute the average
+    combined_df = (squad_df + germanquad_df) / 2
+    combined_df = combined_df.reset_index()
+
+    # Calculate the additional columns needed for plotting
+    combined_df["eval_v2_score_hasAns"] = 0.5 * (combined_df["has_ans_exact"] + combined_df["has_ans_f1"])
+    combined_df["eval_other"] = 1/3 * (combined_df["bert_score"] + combined_df["bleu_score"] + combined_df["rouge_score"])
+    combined_df["overall_score"] = 0.5 * (combined_df["eval_v2_score_hasAns"] + combined_df["eval_other"])
+
+    # Sort the combined dataframe by overall score
+    combined_df_sorted = combined_df.sort_values(by="overall_score")
+
+    plt.figure(figsize=figsize)
+    plt.scatter(
+        combined_df_sorted["eval_other"], combined_df_sorted["eval_v2_score_hasAns"], c="b", alpha=0.5
+    )
+
+    texts = []
+    for i, txt in enumerate(combined_df_sorted["short_name"]):
+        model_name = model_names.get(txt, txt).split("\n")[0]  # Extract only the model name
+        texts.append(
+            plt.text(
+                combined_df_sorted["eval_other"].iat[i],
+                combined_df_sorted["eval_v2_score_hasAns"].iat[i],
+                model_name,
+                fontsize=fontsize,
+                ha="right",
+            )
+        )
+
+    # Use adjust_text to minimize overlaps
+    adjust_text(
+        texts,
+        only_move={"text": "y"},
+        expand_text=(1.2, 1.2),
+        expand_points=(1.2, 1.2),
+        force_text=0.3,
+        force_points=0.3,
+    )
+
+    plt.xlabel("BBR Score (BLEU, BERT, ROUGE)", fontsize=fontsize)
+    plt.ylabel("Eval V2 Score (F1, Exact Match)", fontsize=fontsize)
+    plt.title("Combined Model Performance Gardner Quadrant", fontsize=fontsize)
+
+    plt.grid(True)
+
+    # SAVE ⬇️
+    save_path = os.path.join(figure_root, "combined-gardner-quadrant.png")
+    plt.savefig(save_path)
+
+    plt.show()
