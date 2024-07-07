@@ -56,6 +56,11 @@ This directory covers all LLM-related research directories and files, including:
 **models:**
 - Contains the scripts to run inference on different models
 
+**local_models:**
+- Local models which cannot be found on Hugging Face, for example manually fine-tuned models.
+  Models can be added in Hugging Face model format as `local_models/<model_name>/<checkpoint>`
+  with `"<model_name>/<checkpoint>"` added as a new model to the "local" key in `scripts/model_ids.py`.
+
 **scripts:**
 - The scripts to execute model fine-tuning (`fine-tune.py`), run predictions (`run.py` with commands `base.py` for pre-trained models and `tuned.py` for fine-tuned models), and utility functions (`utils.py`).
 
