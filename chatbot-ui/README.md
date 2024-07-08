@@ -3,6 +3,8 @@
 This module provides a graphical user interface for interacting with
 the modules that we evaluated.
 
+![UI Demo](../assets/chatbot-ui-demo.png)
+
 ## Setup
 
 Install the required dependencies by executing the following command in this
