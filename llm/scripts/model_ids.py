@@ -44,6 +44,7 @@ model_IDs = {
     ],
     "local": [
         "bert-finetuned-squad/checkpoint-33276",
+        "roberta_base_large_G_tuned/checkpoint",
     ],
 }
 
