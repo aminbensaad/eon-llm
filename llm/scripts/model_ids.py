@@ -57,7 +57,7 @@ def model_name_from_id(model_id: str, model_type: str = "") -> str:
 
 
 def model_script_path(model_type: str, model_id: str) -> str:
-    model_name = model_name_from_id(model_id)
+    model_name = model_name_from_id(model_id, model_type)
     script_path = os.path.join(model_dir, model_type, f"{model_name}.py")
 
     if os.path.exists(script_path):
