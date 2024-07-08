@@ -1,3 +1,13 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:6700d988ddb4e241a9d4135e5051443da0c762ae9454c70745c8c60cefe47ef1
-size 361
+# roberta-base-large-G-tuned
+
+This is a fine-tuned model based on [roberta-large-squad2](https://huggingface.co/deepset/roberta-large-squad2).
+It is fine-tuned on the SQuAD 1.1 dataset with the following hyperparameters:
+
+```python
+TrainingArguments(
+    evaluation_strategy="epoch",
+    learning_rate=2e-5,
+    num_train_epochs=3,
+    weight_decay=0.01,
+)
+```

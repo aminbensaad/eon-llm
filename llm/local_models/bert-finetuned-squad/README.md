@@ -1,3 +1,14 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:bb7db77284614b21799619e3606bc9e2b6b78a107e315af72ee681107309d16a
-size 361
+# bert-finetuned-squad
+
+This is a fine-tuned model based on [bert-base-cased](https://huggingface.co/google-bert/bert-base-cased).
+It is fine-tuned on the SQuAD 1.1 dataset with the following hyperparameters:
+
+```python
+TrainingArguments(
+    evaluation_strategy="no",
+    learning_rate=2e-5,
+    num_train_epochs=3,
+    weight_decay=0.01,
+    fp16=True,
+)
+```
