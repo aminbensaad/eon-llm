@@ -151,6 +151,7 @@ def plot_heat_map(
     model_names,
     cmap="Greens",
     fontsize=12,
+    annot_fontsize=14,
     figsize=(12, 8),
 ):
     df_sorted = df[df["dataset"] == dataset_name].sort_values(by="overall_score")
@@ -179,7 +180,7 @@ def plot_heat_map(
     heat_data.index = [model_names.get(name, name) for name in heat_data.index]
 
     # Create the heatmap
-    sns.heatmap(heat_data, annot=True, cmap=cmap)
+    sns.heatmap(heat_data, annot=True, cmap=cmap, annot_kws={"size": annot_fontsize})
 
     plt.title(f"Model Metrics Heatmap - {dataset_name}", fontsize=fontsize)
     plt.xticks(fontsize=fontsize)
@@ -266,7 +267,7 @@ def plot_bar_chart_comparison(
         [model_names.get(name, name) for name in df_sorted["short_name"]],
         rotation=0,
         fontsize=fontsize,
-    )
+            )
     plt.yticks(fontsize=fontsize)
     plt.legend(fontsize=fontsize)
 
@@ -286,6 +287,7 @@ def plot_comparison_heat_map(
     model_names,
     cmap="Blues",
     fontsize=12,
+    annot_fontsize=14,
     figsize=(14, 8),
 ):
     df_sorted = df[df["dataset"] == dataset_name].sort_values("overall_score")
@@ -308,7 +310,7 @@ def plot_comparison_heat_map(
     ]
 
     # Create the heatmap
-    sns.heatmap(heat_data_comparison, annot=True, cmap=cmap)
+    sns.heatmap(heat_data_comparison, annot=True, cmap=cmap, annot_kws={"size": annot_fontsize})
 
     plt.title(
         f"Comparison of F1 & Exact Match Scores Overall and for Questions with Answers - {dataset_name}",
@@ -326,7 +328,7 @@ def plot_comparison_heat_map(
 
 # Function to plot heat map for timing results
 def plot_timing_heat_map(
-    df, figure_root, model_names, cmap="Reds", fontsize=12, figsize=(8, 8)
+    df, figure_root, model_names, cmap="Reds", fontsize=12, annot_fontsize=14, figsize=(8, 8)
 ):
     # Sort the dataframe by overall_score
     df_sorted = df.sort_values("overall_score").drop_duplicates(subset=["short_name"])
@@ -352,7 +354,7 @@ def plot_timing_heat_map(
     )
 
     # Create the heatmap
-    sns.heatmap(timing_data, annot=annotations, fmt="", cmap=cmap)
+    sns.heatmap(timing_data, annot=annotations, fmt="", cmap=cmap, annot_kws={"size": annot_fontsize})
     plt.title("Model Inference Time", fontsize=fontsize)
     plt.xticks(rotation=0, fontsize=fontsize)
     plt.yticks(rotation=0, fontsize=fontsize)
@@ -366,7 +368,7 @@ def plot_timing_heat_map(
 
 # Function to plot combined heat map for average values of GermanQuAD and SQuAD
 def plot_combined_heat_map(
-    df, figure_root, model_names, cmap="Greens", fontsize=12, figsize=(12, 8)
+    df, figure_root, model_names, cmap="Greens", fontsize=12, annot_fontsize=14, figsize=(12, 8)
 ):
     # Select the relevant columns for both datasets
     relevant_columns = [
@@ -407,7 +409,7 @@ def plot_combined_heat_map(
     heat_data_sorted = heat_data.sort_values(by="OVERALL")
     plt.figure(figsize=figsize)
 
-    sns.heatmap(heat_data_sorted, annot=True, cmap=cmap)
+    sns.heatmap(heat_data_sorted, annot=True, cmap=cmap, annot_kws={"size": annot_fontsize})
 
     plt.title("Combined Model Metrics Heatmap", fontsize=fontsize)
     plt.xticks(fontsize=fontsize)
@@ -420,7 +422,7 @@ def plot_combined_heat_map(
     plt.show()
 
 
-def plot_combined_gardner_quadrant(df, figure_root, model_names, fontsize=12, figsize=(14, 6)):
+def plot_combined_gardner_quadrant(df, figure_root, model_names, fontsize=12, annot_fontsize=14, tick_fontsize=16, figsize=(14, 6)):
     # Select the relevant columns for both datasets
     relevant_columns = [
         "short_name",
@@ -466,7 +468,7 @@ def plot_combined_gardner_quadrant(df, figure_root, model_names, fontsize=12, fi
                 combined_df_sorted["eval_other"].iat[i],
                 combined_df_sorted["eval_v2_score_hasAns"].iat[i],
                 model_name,
-                fontsize=fontsize,
+                fontsize=annot_fontsize,
                 ha="right",
             )
         )
@@ -484,7 +486,8 @@ def plot_combined_gardner_quadrant(df, figure_root, model_names, fontsize=12, fi
     plt.xlabel("BBR Score (BLEU, BERT, ROUGE)", fontsize=fontsize)
     plt.ylabel("Eval V2 Score (F1, Exact Match)", fontsize=fontsize)
     plt.title("Combined Model Performance Gardner Quadrant", fontsize=fontsize)
-
+    plt.xticks(fontsize=tick_fontsize)
+    plt.yticks(fontsize=tick_fontsize)
     plt.grid(True)
 
     # SAVE ⬇️
