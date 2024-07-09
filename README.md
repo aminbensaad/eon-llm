@@ -11,13 +11,8 @@ To get started, clone the repository first:
 git clone https://github.com/aminbensaad/eon-llm.git
 ```
 
-In order to access our own fine-tuned models, download them via git-lfs.
-For that, first go into the cloned repository (`cd eon-llm`) and execute
-the following command:
-
-```sh
-git submodule update --init --progress
-```
+In order to access our own fine-tuned models, instructions to install them
+can be found in `llm/local_models/*/README.md`.
 
 To avoid conflicts with the system, it is recommended to use a virtual environment,
 for example with `conda` or `virtualenv`.
