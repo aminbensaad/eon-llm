@@ -42,3 +42,5 @@ At last, start writing queries into the chat input field and wait for prediction
 (which can, depending on the model and the hardware, take a while).
 
 ![UI Demo](../assets/chatbot-ui-demo.png)
+
+![UI Demo Video](https://github.com/user-attachments/assets/757c3983-19e5-495c-9e4a-52a713e5fefd)
