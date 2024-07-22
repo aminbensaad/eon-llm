@@ -1,4 +1,4 @@
-### README.md - LLM 
+### README.md - LLM
 
 # Project Setup 🛠️
 

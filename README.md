@@ -91,5 +91,6 @@ The Jupyter notebooks contain various code snippets to generate figures, run
 inference or evaluate results.
 The following notebooks exist:
 
-- `llm/experiments.ipynb`: Code to generate the figures used to compare models
-                           which were also used in presentation and paper
+- `experiments/dataset_exploration.ipynb`: Code to explore provided datasets
+- `experiments/visualization.ipynb`: Code to generate the figures used to compare
+  models which were also used in presentation and paper
