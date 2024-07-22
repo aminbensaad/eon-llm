@@ -62,13 +62,13 @@ This directory covers all LLM-related research directories and files, including:
   with `"<model_name>/<checkpoint>"` added as a new model to the "local" key in `scripts/model_ids.py`.
 
 **scripts:**
-- The scripts to execute model fine-tuning (`fine-tune.py`), run predictions (`run.py` with commands `base.py` for pre-trained models and `tuned.py` for fine-tuned models), and utility functions (`utils.py`).
+- The scripts to run predictions (`run.py` with commands `base.py` for pre-trained models and `tuned.py` for fine-tuned models), and utility functions (`utils.py`).
 
 **experiments.ipynb:**
 - This Jupyter notebook is used for experimentation and to generate visualizations for model & evaluation results.
 
 **timing_results.json:**
-- This file contains the results of the utils function 'store_timing_results()' which captures the inference times for each model on SQuAD v2 and GermanQuAD
+- This file contains the results of the utils function `store_timing_results()` which captures the inference times for each model on SQuAD v2 and GermanQuAD
 
 
 --------------------
@@ -76,4 +76,4 @@ This directory covers all LLM-related research directories and files, including:
 **IMPORTANT:**
 - Results (evaluation or models) are always separated by model types (i.e., base, Gbase, tuned, Gtuned).
 
-Please update the content in case of changes. 
+Please update the content in case of changes.
