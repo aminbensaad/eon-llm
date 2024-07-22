@@ -17,7 +17,6 @@ def main(model_name, input_path, output_path):
     predict.generate_answers_with_pipeline(model_name, input_path, output_path)
 
 
-
 def main(model_name, input_path, output_path):
     utils.generate_answers_with_sliding_window(
         model_name, input_path, output_path, use_token_type_ids=True

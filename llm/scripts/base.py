@@ -20,6 +20,12 @@ logger = logging.getLogger(__name__)
 
 
 def main(model_name, input_path, output_path):
+    """
+    :param str model_name: Model name from which it can be loaded with the HuggingFace
+                           transformers API
+    :param str input_path: Path to question-answering input data in JSON format
+    :param str output_path: Path to which the answers should be written to in JSON format
+    """
 
     # Load the tokenizer and model
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -34,7 +40,7 @@ def main(model_name, input_path, output_path):
             model=model_name,
             tokenizer=tokenizer,
             torch_dtype=torch.bfloat16,
-            device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
         )
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
@@ -46,6 +52,9 @@ def main(model_name, input_path, output_path):
         dataset_data = json.load(f)
 
     def answer_question_with_pipeline(question, context, max_new_tokens=250):
+        """
+        Generate answer for given context and question.
+        """
         prompt = f"{question}\n{context}\nAnswer:"
         sequences = generation_pipeline(
             prompt,

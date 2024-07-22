@@ -1,5 +1,10 @@
 import logging
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    pipeline,
+    BitsAndBytesConfig,
+)
 import json
 from tqdm import tqdm
 import torch
@@ -80,7 +85,10 @@ def main(model_name, input_path, output_path):
     # Process all questions
     article_progress = tqdm(total=len(dataset_data["data"]), desc="Processing articles")
     for i, article in enumerate(dataset_data["data"]):
-        question_progress = tqdm(total=sum(len(paragraph["qas"]) for paragraph in article["paragraphs"]), desc=f"Processing questions in article {i+1}")
+        question_progress = tqdm(
+            total=sum(len(paragraph["qas"]) for paragraph in article["paragraphs"]),
+            desc=f"Processing questions in article {i+1}",
+        )
         for paragraph in article["paragraphs"]:
             context = paragraph["context"]
             for qa in paragraph["qas"]:

@@ -18,6 +18,12 @@ logger = logging.getLogger(__name__)
 
 
 def main(model_name, input_path, output_path):
+    """
+    :param str model_name: Model name from which it can be loaded with the HuggingFace
+                           transformers API
+    :param str input_path: Path to question-answering input data in JSON format
+    :param str output_path: Path to which the answers should be written to in JSON format
+    """
 
     logger.info("Loading the tokenizer and model...")
     # Load the tokenizer and model
@@ -43,6 +49,12 @@ def main(model_name, input_path, output_path):
     def answer_question_with_sliding_window(
         question, context, max_length=max_length, stride=128
     ):
+        """
+        Use sliding window to answer given question based on given context.
+
+        :return: Answer to given question or an empty string if no answer
+                 can be generated.
+        """
         inputs = tokenizer(
             question,
             context,
