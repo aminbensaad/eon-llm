@@ -1,5 +1,10 @@
 import logging
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM,
+    pipeline,
+    BitsAndBytesConfig,
+)
 import json
 from tqdm import tqdm
 import torch
@@ -32,7 +37,7 @@ def main(model_name, input_path, output_path):
 
     logger.info(f"Loading dataset from {input_path}...")
     # Load dataset data
-    with open(input_path, "r", encoding='utf-8') as f:
+    with open(input_path, "r", encoding="utf-8") as f:
         dataset_data = json.load(f)
 
     logger.info("Generating answers for all questions in the dataset...")
@@ -62,7 +67,7 @@ def main(model_name, input_path, output_path):
                     top_k=10,
                     num_return_sequences=1,
                     eos_token_id=tokenizer.eos_token_id,
-                    pad_token_id=tokenizer.eos_token_id
+                    pad_token_id=tokenizer.eos_token_id,
                 )
                 answer = output[0]["generated_text"].split("Answer:")[-1].strip()
                 answers.append(answer)
@@ -96,6 +101,6 @@ def main(model_name, input_path, output_path):
 
 if __name__ == "__main__":
     model_name = "tiiuae/falcon-7b-instruct"
-    input_path =  sys.argv[2]
-    output_path =  sys.argv[3]
+    input_path = sys.argv[2]
+    output_path = sys.argv[3]
     main(model_name, input_path, output_path)

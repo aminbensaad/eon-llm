@@ -40,7 +40,7 @@ def main(model_name, input_path, output_path):
             model=model_name,
             tokenizer=tokenizer,
             torch_dtype=torch.bfloat16,
-            device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
         )
     except Exception as e:
         logger.error(f"Failed to load model: {e}")

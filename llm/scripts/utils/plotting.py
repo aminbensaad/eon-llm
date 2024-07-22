@@ -557,21 +557,38 @@ def plot_combined_gardner_quadrant(
     combined_df = combined_df.reset_index()
 
     # Calculate the additional columns needed for plotting
-    combined_df["eval_v2_score_hasAns"] = 0.5 * (combined_df["has_ans_exact"] + combined_df["has_ans_f1"])
-    combined_df["eval_other"] = 1/3 * (combined_df["bert_score"] + combined_df["bleu_score"] + combined_df["rouge_score"])
-    combined_df["overall_score"] = 0.5 * (combined_df["eval_v2_score_hasAns"] + combined_df["eval_other"])
+    combined_df["eval_v2_score_hasAns"] = 0.5 * (
+        combined_df["has_ans_exact"] + combined_df["has_ans_f1"]
+    )
+    combined_df["eval_other"] = (
+        1
+        / 3
+        * (
+            combined_df["bert_score"]
+            + combined_df["bleu_score"]
+            + combined_df["rouge_score"]
+        )
+    )
+    combined_df["overall_score"] = 0.5 * (
+        combined_df["eval_v2_score_hasAns"] + combined_df["eval_other"]
+    )
 
     # Sort the combined dataframe by overall score
     combined_df_sorted = combined_df.sort_values(by="overall_score")
 
     plt.figure(figsize=figsize)
     plt.scatter(
-        combined_df_sorted["eval_other"], combined_df_sorted["eval_v2_score_hasAns"], c="b", alpha=0.5
+        combined_df_sorted["eval_other"],
+        combined_df_sorted["eval_v2_score_hasAns"],
+        c="b",
+        alpha=0.5,
     )
 
     texts = []
     for i, txt in enumerate(combined_df_sorted["short_name"]):
-        model_name = model_names.get(txt, txt).split("\n")[0]  # Extract only the model name
+        model_name = model_names.get(txt, txt).split("\n")[
+            0
+        ]  # Extract only the model name
         texts.append(
             plt.text(
                 combined_df_sorted["eval_other"].iat[i],
