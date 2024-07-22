@@ -3,8 +3,6 @@
 This module provides a graphical user interface for interacting with
 the modules that we evaluated.
 
-![UI Demo](../assets/chatbot-ui-demo.png)
-
 ## Setup
 
 Install the required dependencies by executing the following command in this
@@ -42,3 +40,5 @@ not built with chatting in mind, this can lead to weird answers.
 
 At last, start writing queries into the chat input field and wait for predictions
 (which can, depending on the model and the hardware, take a while).
+
+![UI Demo](../assets/chatbot-ui-demo.png)
