@@ -9,6 +9,14 @@ logger = logging.getLogger(__name__)
 
 # Function to run a model script
 def run_model_script(script, model_ID, input_path, output_path):
+    """
+    Execute evaluation with given script for the model.
+
+    :param str script: Path to inference script of model
+    :param str model_ID: Name of model with which it can be loaded via HuggingFace
+    :param str input_path: Path to JSON file with input dataset
+    :param str output_path: Path to which the generated results should be written to
+    """
     if os.path.exists(script):
         command = ["python", script, model_ID, input_path, output_path]
         logger.info(f"Running {script} for {model_ID}...")
@@ -50,6 +58,19 @@ def evaluate_model_results(
     dataset_file_path,
     metrics,
 ):
+    """
+    Run evaluation scripts on given model.
+
+    :param str metrics_dir: Path to directory containing scripts to caluclate metrics
+    :param str eval_results_dir: Path to directory to which intermediate evaluation results will be written
+    :param str predictions_path: Path to JSON files containing the inference results
+    :param str eval_output_path: Output path to which the evaluation result should be written to
+    :param str model_name: Name of model which should be evaluated
+    :param str model_type: Category of the model (e.g. "base", "tuned", ...)
+    :param str dataset: Name of dataset ("SQuAD" or "G" (for GermanQuAD))
+    :param str dataset_file_path: Path to dataset which was used for the predictions
+    :param list[str] metrics: Metrics which should be caluclated
+    """
     # Scripts
     eval_script = os.path.join(metrics_dir, "evaluate-v2.0.py")
     bleu_script = os.path.join(metrics_dir, "bleu.py")

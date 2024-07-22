@@ -8,6 +8,12 @@ from adjustText import adjust_text
 
 
 def plot_answer_length_distribution(base_dir, fontsize=12, figsize=(10, 6)):
+    """
+    Open window with plot about distribution of answer lengths in given directory.
+
+    :param str base_dir: Directory which will be searched for JSON files which will
+                         be used to create the distribution
+    """
     all_answer_lengths = []
 
     # Iterate through all JSON files in the directory
@@ -38,6 +44,16 @@ def plot_answer_length_distribution(base_dir, fontsize=12, figsize=(10, 6)):
 def plot_bar_chart_with_line_graph(
     df, dataset_name, figure_root, model_names, fontsize=12, figsize=(8, 8)
 ):
+    """
+    Open window with plot displaying a bar plot for the different metrics and above that
+    a line plot with the overall score.
+    This plot will also be saved to disk.
+
+    :param pandas.DataFrame df: Dataframe with all evaluation results (see eval_results/) to be plotted
+    :param str dataset_name: Name of dataset which should be plotted; either "SQuAD" or "GermanQuAD"
+    :param str figure_root: Directory to which the graph should be saved to
+    :param dict model_names: Human-readable display names for each model, if available
+    """
     df_sorted = df[df["dataset"] == dataset_name].sort_values(by="overall_score")
     plt.figure(figsize=figsize)
     bar_width = 0.25
@@ -99,6 +115,16 @@ def plot_bar_chart_with_line_graph(
 def plot_gardner_quadrant(
     df, dataset_name, figure_root, model_names, fontsize=12, figsize=(14, 6)
 ):
+    """
+    Open window with plot displaying a combined score of BLEU, BERTscore and ROUGE against
+    F1 and exact match in a scatter plot.
+    This plot will also be saved to disk.
+
+    :param pandas.DataFrame df: Dataframe with all evaluation results (see eval_results/) to be plotted
+    :param str dataset_name: Name of dataset which should be plotted; either "SQuAD" or "GermanQuAD"
+    :param str figure_root: Directory to which the graph should be saved to
+    :param dict model_names: Human-readable display names for each model, if available
+    """
     df_sorted = df[df["dataset"] == dataset_name].sort_values(by="overall_score")
     plt.figure(figsize=figsize)
     plt.scatter(
@@ -154,6 +180,15 @@ def plot_heat_map(
     annot_fontsize=14,
     figsize=(12, 8),
 ):
+    """
+    Open window with plot displaying a heatmap over all evaluated metrics.
+    This plot will also be saved to disk.
+
+    :param pandas.DataFrame df: Dataframe with all evaluation results (see eval_results/) to be plotted
+    :param str dataset_name: Name of dataset which should be plotted; either "SQuAD" or "GermanQuAD"
+    :param str figure_root: Directory to which the graph should be saved to
+    :param dict model_names: Human-readable display names for each model, if available
+    """
     df_sorted = df[df["dataset"] == dataset_name].sort_values(by="overall_score")
     plt.figure(figsize=figsize)
 
@@ -197,6 +232,16 @@ def plot_heat_map(
 def plot_bar_chart_comparison(
     df, dataset_name, figure_root, model_names, fontsize=12, figsize=(20, 6)
 ):
+    """
+    Open window with plot displaying a bar plot with all given models besides each other
+    visualizing the combined F1 and exact match score and the has-answer scores.
+    This plot will also be saved to disk.
+
+    :param pandas.DataFrame df: Dataframe with all evaluation results (see eval_results/) to be plotted
+    :param str dataset_name: Name of dataset which should be plotted; either "SQuAD" or "GermanQuAD"
+    :param str figure_root: Directory to which the graph should be saved to
+    :param dict model_names: Human-readable display names for each model, if available
+    """
     df_sorted = df[df["dataset"] == dataset_name].sort_values("overall_score")
     plt.figure(figsize=figsize)
     bar_width = 0.2
@@ -267,7 +312,7 @@ def plot_bar_chart_comparison(
         [model_names.get(name, name) for name in df_sorted["short_name"]],
         rotation=0,
         fontsize=fontsize,
-            )
+    )
     plt.yticks(fontsize=fontsize)
     plt.legend(fontsize=fontsize)
 
@@ -290,6 +335,16 @@ def plot_comparison_heat_map(
     annot_fontsize=14,
     figsize=(14, 8),
 ):
+    """
+    Open window with plot displaying a heatmap with all given models visualizing the
+    combined F1 and exact match score and the has-answer scores for each.
+    This plot will also be saved to disk.
+
+    :param pandas.DataFrame df: Dataframe with all evaluation results (see eval_results/) to be plotted
+    :param str dataset_name: Name of dataset which should be plotted; either "SQuAD" or "GermanQuAD"
+    :param str figure_root: Directory to which the graph should be saved to
+    :param dict model_names: Human-readable display names for each model, if available
+    """
     df_sorted = df[df["dataset"] == dataset_name].sort_values("overall_score")
     plt.figure(figsize=figsize)
 
@@ -310,7 +365,9 @@ def plot_comparison_heat_map(
     ]
 
     # Create the heatmap
-    sns.heatmap(heat_data_comparison, annot=True, cmap=cmap, annot_kws={"size": annot_fontsize})
+    sns.heatmap(
+        heat_data_comparison, annot=True, cmap=cmap, annot_kws={"size": annot_fontsize}
+    )
 
     plt.title(
         f"Comparison of F1 & Exact Match Scores Overall and for Questions with Answers - {dataset_name}",
@@ -328,8 +385,22 @@ def plot_comparison_heat_map(
 
 # Function to plot heat map for timing results
 def plot_timing_heat_map(
-    df, figure_root, model_names, cmap="Reds", fontsize=12, annot_fontsize=14, figsize=(8, 8)
+    df,
+    figure_root,
+    model_names,
+    cmap="Reds",
+    fontsize=12,
+    annot_fontsize=14,
+    figsize=(8, 8),
 ):
+    """
+    Open window with heatmap visualizing the runtime of each model contained in the dataframe.
+    This plot will also be saved to disk.
+
+    :param pandas.DataFrame df: Dataframe with all evaluation results (see eval_results/) to be plotted
+    :param str figure_root: Directory to which the graph should be saved to
+    :param dict model_names: Human-readable display names for each model, if available
+    """
     # Sort the dataframe by overall_score
     df_sorted = df.sort_values("overall_score").drop_duplicates(subset=["short_name"])
 
@@ -354,7 +425,13 @@ def plot_timing_heat_map(
     )
 
     # Create the heatmap
-    sns.heatmap(timing_data, annot=annotations, fmt="", cmap=cmap, annot_kws={"size": annot_fontsize})
+    sns.heatmap(
+        timing_data,
+        annot=annotations,
+        fmt="",
+        cmap=cmap,
+        annot_kws={"size": annot_fontsize},
+    )
     plt.title("Model Inference Time", fontsize=fontsize)
     plt.xticks(rotation=0, fontsize=fontsize)
     plt.yticks(rotation=0, fontsize=fontsize)
@@ -368,8 +445,22 @@ def plot_timing_heat_map(
 
 # Function to plot combined heat map for average values of GermanQuAD and SQuAD
 def plot_combined_heat_map(
-    df, figure_root, model_names, cmap="Greens", fontsize=12, annot_fontsize=14, figsize=(12, 8)
+    df,
+    figure_root,
+    model_names,
+    cmap="Greens",
+    fontsize=12,
+    annot_fontsize=14,
+    figsize=(12, 8),
 ):
+    """
+    Open window with heatmap displaying the combined values of all metrics for all datasets.
+    This plot will also be saved to disk.
+
+    :param pandas.DataFrame df: Dataframe with all evaluation results (see eval_results/) to be plotted
+    :param str figure_root: Directory to which the graph should be saved to
+    :param dict model_names: Human-readable display names for each model, if available
+    """
     # Select the relevant columns for both datasets
     relevant_columns = [
         "short_name",
@@ -409,7 +500,9 @@ def plot_combined_heat_map(
     heat_data_sorted = heat_data.sort_values(by="OVERALL")
     plt.figure(figsize=figsize)
 
-    sns.heatmap(heat_data_sorted, annot=True, cmap=cmap, annot_kws={"size": annot_fontsize})
+    sns.heatmap(
+        heat_data_sorted, annot=True, cmap=cmap, annot_kws={"size": annot_fontsize}
+    )
 
     plt.title("Combined Model Metrics Heatmap", fontsize=fontsize)
     plt.xticks(fontsize=fontsize)
@@ -422,7 +515,23 @@ def plot_combined_heat_map(
     plt.show()
 
 
-def plot_combined_gardner_quadrant(df, figure_root, model_names, fontsize=12, annot_fontsize=14, tick_fontsize=16, figsize=(14, 6)):
+def plot_combined_gardner_quadrant(
+    df,
+    figure_root,
+    model_names,
+    fontsize=12,
+    annot_fontsize=14,
+    tick_fontsize=16,
+    figsize=(14, 6),
+):
+    """
+    Open window with scatter plot displaying all metrics of SQuAD and GermanQuAD combined.
+    This plot will also be saved to disk.
+
+    :param pandas.DataFrame df: Dataframe with all evaluation results (see eval_results/) to be plotted
+    :param str figure_root: Directory to which the graph should be saved to
+    :param dict model_names: Human-readable display names for each model, if available
+    """
     # Select the relevant columns for both datasets
     relevant_columns = [
         "short_name",
@@ -432,7 +541,7 @@ def plot_combined_gardner_quadrant(df, figure_root, model_names, fontsize=12, an
         "rouge_score",
         "bert_score",
         "exact",
-        "f1"
+        "f1",
     ]
 
     # Split the dataframe into SQuAD and GermanQuAD

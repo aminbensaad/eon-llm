@@ -10,6 +10,13 @@ logger = logging.getLogger(__name__)
 
 
 def load_model_and_tokenizer(model_name):
+    """
+    Use HuggingFace transformers to load a model.
+
+    :param str model_name: Name of model which can be used to load it via HuggingFace
+
+    :return: Tuple containing a matching tokenizer, model and accelerator device
+    """
     logger.info("Loading the tokenizer and model...")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForQuestionAnswering.from_pretrained(model_name)
@@ -20,12 +27,26 @@ def load_model_and_tokenizer(model_name):
 
 
 def load_pipeline(model_name):
+    """
+    Create pipeline for question-answering task for given model.
+
+    :param str model_name: Name of model which can be used to load it via HuggingFace
+
+    :return: Pipeline which can be used to generate answers from questions
+    """
     logger.info("Loading the question-answering pipeline...")
     qa_pipeline = pipeline("question-answering", model=model_name, tokenizer=model_name)
     return qa_pipeline
 
 
 def load_dataset(input_path):
+    """
+    Load local dataset.
+
+    :param str input_path: Path to JSON file containing question-answering data
+
+    :return: The loaded dataset
+    """
     logger.info(f"Loading dataset from {input_path}...")
     with open(input_path, "r", encoding='utf-8') as f:
         dataset_data = json.load(f)
@@ -49,6 +70,17 @@ def answer_question_with_sliding_window(
     max_length=512,
     stride=128,
 ):
+    """
+    Generate answers based on given context and question, using the provided model.
+
+    :param AutoTokenizer tokenizer: Tokenizer to encode input; must match the model
+    :param AutoModelForQuestionAnswering model: Model to run the inference on
+    :param torch.device device: Accelerator device
+    :param str question: Question to be answered
+    :param str context: Context based on which the question should be answered
+
+    :return: String containing the generated answer
+    """
     inputs = tokenizer(
         question,
         context,
@@ -102,6 +134,13 @@ def answer_question_with_sliding_window(
 def generate_answers_with_sliding_window(
     model_name, input_path, output_path, use_token_type_ids=True, max_length=512
 ):
+    """
+    Generate multiple answers based on sliding window and write the results to disk.
+
+    :param str model_name: Name of model with which the model can be loaded
+    :param str input_path: Path to JSON file with context and questions
+    :param str output_path: Path to which the answers should be written to
+    """
     tokenizer, model, device = load_model_and_tokenizer(model_name)
     dataset_data = load_dataset(input_path)
     results = []
@@ -128,6 +167,13 @@ def generate_answers_with_sliding_window(
 
 
 def generate_answers_with_pipeline(model_name, input_path, output_path):
+    """
+    Generate multiple answers based on sliding window and write the results to disk.
+
+    :param str model_name: Name of model with which the model can be loaded
+    :param str input_path: Path to JSON file with context and questions
+    :param str output_path: Path to which the answers should be written to
+    """
     qa_pipeline = load_pipeline(model_name)
     dataset_data = load_dataset(input_path)
     results = []
@@ -152,6 +198,14 @@ def generate_answers_with_pipeline(model_name, input_path, output_path):
 
 
 def validate_predictions(predictions_path, dataset_path):
+    """
+    Ensure that the predictions match the original input data and that they are complete.
+
+    :param str predictions_path: Path to JSON file containing predictions
+    :param str dataset_path: Path to dataset against which the predictions should be validated
+
+    :return: Bool indicating if the predictions match and are complete or not
+    """
     with open(predictions_path, "r", encoding="utf-8") as f:
         predictions = json.load(f)
 

@@ -40,6 +40,9 @@ datasets = {
 
 
 def print_usage():
+    """
+    Print usage text to stdout.
+    """
     print("Usage: python run.py [options] -d <dataset>... -m <model_type>...")
     print("Options:")
     print("  -d, --datasets        Specify the datasets to use (SQuAD, G).")

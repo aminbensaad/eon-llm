@@ -39,6 +39,10 @@ logger = logging.getLogger(__name__)
 
 
 def print_disk_quota():
+    """
+    Print usage information about disk.
+    This is for debugging purposes since models can require multiple GBs of space.
+    """
     total, used, free = shutil.disk_usage("/")
     print(f"Total: {total // (2**30)} GB")
     print(f"Used: {used // (2**30)} GB")
@@ -55,6 +59,13 @@ OUTPUT_DIR = "./results"
 
 
 def load_and_split_dataset(train_path, split_ratio=0.2):
+    """
+    Load data and generate a training and validation dataset.
+    The training dataset can be used for the fine-tuning while the validation dataset
+    is for evaluating the actual model performance in different epochs.
+
+    :param str train_path: Path to JSON data to be loaded
+    """
     train_data = load_dataset(train_path)
 
     articles = train_data["data"]
@@ -93,11 +104,24 @@ def load_and_split_dataset(train_path, split_ratio=0.2):
 
 
 def print_model_layers(model):
+    """
+    Print names of all layers in given model to stdout.
+
+    :param AutoModelForQuestionAnswering model: Model which should be inspected
+    """
     for name, module in model.named_modules():
         print(name)
 
 
 def check_target_modules(model, target_modules):
+    """
+    Check if model provides all given modules.
+
+    :param AutoModelForQuestionAnswering model: Model of which models should be checked
+    :param list target_modules: Modules which the given model should provide
+
+    :return: Intersection of provided modules by model and desired target_modules
+    """
     model_layers = [name for name, _ in model.named_modules()]
     missing_modules = [
         module for module in target_modules if module not in model_layers

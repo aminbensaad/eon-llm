@@ -9,6 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 def check_disk_space(min_free_gb=30):
+    """
+    Ensure that disk has enough space for new models.
+    Delete old models if this is not the case.
+
+    :param int min_free_gb: Number of space in GBs which the new models need.
+    """
     total, used, free = shutil.disk_usage("/")
     free_gb = free // (2**30)
     if free_gb < min_free_gb:
@@ -19,6 +25,9 @@ def check_disk_space(min_free_gb=30):
 
 
 def clear_huggingface_cache():
+    """
+    Delete all currently downloaded HuggingFace models.
+    """
     cache_dir = os.path.expanduser("~/.cache/huggingface/transformers")
     if os.path.exists(cache_dir):
         shutil.rmtree(cache_dir)
@@ -26,6 +35,9 @@ def clear_huggingface_cache():
 
 
 def remove_safetensors_files(cache_dir=None):
+    """
+    Clear all safetensors files from HuggingFace hub model cache.
+    """
     if cache_dir is None:
         cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
 
@@ -48,6 +60,9 @@ def remove_safetensors_files(cache_dir=None):
 
 
 def test_gpu_matrix_multiplication():
+    """
+    Print debug information about available GPU support.
+    """
     # Test if GPU is available
     is_cuda_available = torch.cuda.is_available()
     print("CUDA available:", is_cuda_available)

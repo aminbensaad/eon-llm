@@ -50,6 +50,13 @@ model_IDs = {
 
 
 def model_name_from_id(model_id: str, model_type: str = "") -> str:
+    """
+    Get a model name from its model ID.
+    This name is used to determine the output files for the evaluation.
+
+    :param str model_id: ID of model
+    :param str model_type: Category of model, e.g. "base", "tuned", "Gbase", ...
+    """
     model_id_components = model_id.split("/")
     if model_type == "local":
         return model_id_components[-2]
@@ -57,6 +64,14 @@ def model_name_from_id(model_id: str, model_type: str = "") -> str:
 
 
 def model_script_path(model_type: str, model_id: str) -> str:
+    """
+    Get script path for given model.
+
+    :param str model_type: Category of model, e.g. "base", "tuned", "Gbase", ...
+    :param str model_id: ID of model for which the script path should be returned
+
+    :return: Path to script which can be executed to evaluate given model
+    """
     model_name = model_name_from_id(model_id, model_type)
     script_path = os.path.join(model_dir, model_type, f"{model_name}.py")
 
