@@ -3,7 +3,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import json
 from tqdm import tqdm
 import sys
-import os
 import torch
 
 # Set up logging

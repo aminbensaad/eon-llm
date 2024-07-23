@@ -11,9 +11,6 @@ from tqdm import tqdm
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from llm.scripts.utils import predict
-
 # Set up logging
 logging.basicConfig(level=logging.INFO)  # Changed to INFO for standard output
 logger = logging.getLogger(__name__)
