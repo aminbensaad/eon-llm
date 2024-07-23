@@ -14,15 +14,17 @@ git clone https://github.com/aminbensaad/eon-llm.git
 In order to access our own fine-tuned models, instructions to install them
 can be found in `llm/local_models/*/README.md`.
 
-To avoid conflicts with the system, it is recommended to use a virtual environment,
-for example with `conda` or `virtualenv`.
-As an example for `conda`, the following two commands can be used:
+To avoid conflicts with packages already installed on the system, it is recommended
+to use a virtual environment, for example with `conda` or `virtualenv`.
+As an example for `virtualenv`, the following two commands can be used:
 
 ```sh
-conda env create -f environment.yml
-conda activate eon-llm
+python -m venv venv
+source venv/bin/activate
 ```
 
+Before proceeding, please ensure to have `pc_config` available on the system.
+On Ubuntu, this can be installed via `apt install libpq-dev`.
 Finally, install all the required dependencies with the following command:
 
 ```sh
@@ -34,7 +36,7 @@ pip install -r requirements.txt
 The repository is divided into an evaluation pipeline, a chatbot UI,
 a fine-tuning script and Jupyter notebooks with experiments.
 
-## Evaluation Pipeline
+### Evaluation Pipeline
 
 Before a model can be evaluated, the predictions have to be generated first.
 This can be done with the following command for the SQuAD dataset on
@@ -73,7 +75,7 @@ It can be run with the following command:
 streamlit run chatbot-ui/Chatbot.py
 ```
 
-## Fine-tuning script
+### Fine-tuning script
 
 The fine-tuning script is located at `./fine-tune.py` and can be run with the
 following command:
@@ -85,7 +87,7 @@ python fine-tune.py
 All adjustments to selected model, used dataset and hyperparameters must be made
 in the script itself.
 
-## Experiments
+### Experiments
 
 The Jupyter notebooks contain various code snippets to generate figures, run
 inference or evaluate results.
