@@ -55,7 +55,7 @@ print_disk_quota()
 base = "llm/"
 MODEL_NAME = "deepset/roberta-large-squad2"  # Change to any model from the list
 TRAIN_DATASET_PATH = os.path.join(base, "data/GermanQuAD/GermanQuAD_train.json")
-OUTPUT_DIR = "./results"
+OUTPUT_DIR = "./fine_tune_results"
 
 
 def load_and_split_dataset(train_path, split_ratio=0.2):
