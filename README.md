@@ -54,6 +54,9 @@ and for different model sets the following categories can be used instead of "tu
 - Gtuned: GermanQuAD fine-tuned models
 - Gbase: Untuned models for German
 
+By adding or removing models in `llm/scripts/model_ids.py`, it is possible to adjust
+which models will be executed as part of the category.
+
 To run the evaluation scripts on the generated results, run the following command:
 
 ```sh
