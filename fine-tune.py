@@ -31,7 +31,7 @@ import torch
 import json
 from sklearn.model_selection import train_test_split
 from peft import LoraConfig, get_peft_model, TaskType  # Import PEFT
-from utils.predict import load_dataset
+from llm.scripts.utils.predict import load_dataset
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -52,7 +52,7 @@ def print_disk_quota():
 print_disk_quota()
 
 # Define constants
-base = ".."
+base = "llm/"
 MODEL_NAME = "deepset/roberta-large-squad2"  # Change to any model from the list
 TRAIN_DATASET_PATH = os.path.join(base, "data/GermanQuAD/GermanQuAD_train.json")
 OUTPUT_DIR = "./results"
